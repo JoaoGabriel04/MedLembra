@@ -1,6 +1,9 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import { authRoutes } from './routes/auth.routes'
+import { usuariosRoutes } from './routes/usuarios.routes'
+import { vinculosRoutes } from './routes/vinculos.routes'
+import { cuidadorRoutes } from './routes/cuidador.routes'
 import { errorHandler } from './middlewares/error.middleware'
 
 dotenv.config()
@@ -15,6 +18,9 @@ app.get('/health', (_req, res) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/usuarios', usuariosRoutes)
+app.use('/api/vinculos', vinculosRoutes)
+app.use('/api/cuidador', cuidadorRoutes)
 
 app.use(errorHandler)
 
