@@ -1,6 +1,3 @@
-// Sistema de Gestão de Medicamentos para Idosos
-// Schema Prisma — versão MVP (trabalho final de disciplina)
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,10 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
-// =========================================================
-// ENUMS
-// =========================================================
 
 enum TipoUsuario {
   IDOSO
@@ -21,79 +14,58 @@ enum TipoUsuario {
 enum StatusTomada {
   TOMADO
   PULADO
+  PENDENTE
 }
 
-// =========================================================
-// MODELS
-// =========================================================
-
 model Usuario {
-  id        Int         @id @default(autoincrement())
-  nome      String
-  email     String      @unique
-  senhaHash String      @map("senha_hash")
-  tipo      TipoUsuario
+  id           Int         @id @default(autoincrement())
+  nome         String
+  email        String      @unique
+  senha        String
+  tipo         TipoUsuario
 
-  // Self-relation: um CUIDADOR cuida de N IDOSOs.
-  // Quando este Usuario for um IDOSO, cuidadorId aponta para o Usuario CUIDADOR responsavel.
-  // Quando for um CUIDADOR, o campo fica null e o lado inverso `idosos` lista os vinculados.
-  cuidadorId Int?       @map("cuidador_id")
-  cuidador   Usuario?   @relation("CuidadorIdoso", fields: [cuidadorId], references: [id], onDelete: SetNull)
-  idosos     Usuario[]  @relation("CuidadorIdoso")
+  cuidadorId   Int?
+  cuidador     Usuario?    @relation("CuidadorIdosos", fields: [cuidadorId], references: [id])
+  idosos       Usuario[]   @relation("CuidadorIdosos")
 
-  // Medicamentos cadastrados (preenchido apenas quando tipo = IDOSO).
   medicamentos Medicamento[]
 
-  criadoEm     DateTime @default(now()) @map("criado_em")
-  atualizadoEm DateTime @updatedAt      @map("atualizado_em")
-
-  @@index([cuidadorId])
-  @@map("usuarios")
+  criadoEm    DateTime    @default(now())
+  atualizadoEm DateTime   @updatedAt
 }
 
 model Medicamento {
-  id      Int     @id @default(autoincrement())
-  idosoId Int     @map("idoso_id")
-  idoso   Usuario @relation(fields: [idosoId], references: [id], onDelete: Cascade)
-
+  id               Int      @id @default(autoincrement())
+  idosoId          Int
+  idoso            Usuario  @relation(fields: [idosoId], references: [id], onDelete: Cascade)
   nome             String
-  dosagem          String   // ex: "500mg", "1 comprimido", "10ml"
-  frequenciaDiaria Int      @map("frequencia_diaria") // quantas doses por dia
-  estoqueAtual     Int      @map("estoque_atual")     // unidades disponiveis (comprimidos, ml, etc)
-  dataValidade     DateTime @map("data_validade") @db.Date
+  dosagem          String
+  frequenciaDiaria Int
+  estoqueAtual     Int
+  dataValidade     DateTime @db.Date
 
-  horarios  Horario[]
-  registros RegistroTomada[]
+  horarios         Horario[]
+  registros        RegistroTomada[]
 
-  criadoEm     DateTime @default(now()) @map("criado_em")
-  atualizadoEm DateTime @updatedAt      @map("atualizado_em")
-
-  @@index([idosoId])
-  @@map("medicamentos")
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
 }
 
 model Horario {
   id            Int         @id @default(autoincrement())
-  medicamentoId Int         @map("medicamento_id")
+  medicamentoId Int
   medicamento   Medicamento @relation(fields: [medicamentoId], references: [id], onDelete: Cascade)
+  hora          String
 
-  hora String // formato "HH:mm" — ex: "08:00", "14:30", "22:00"
-
-  @@unique([medicamentoId, hora]) // nao permite horarios duplicados no mesmo remedio
-  @@index([medicamentoId])
-  @@map("horarios")
+  registros     RegistroTomada[]
 }
 
 model RegistroTomada {
-  id            Int         @id @default(autoincrement())
-  medicamentoId Int         @map("medicamento_id")
-  medicamento   Medicamento @relation(fields: [medicamentoId], references: [id], onDelete: Cascade)
-
-  dataHora DateTime     @map("data_hora") // momento real do evento (UTC)
-  status   StatusTomada
-
-  criadoEm DateTime @default(now()) @map("criado_em")
-
-  @@index([medicamentoId, dataHora])
-  @@map("registros_tomada")
+  id            Int          @id @default(autoincrement())
+  medicamentoId Int
+  medicamento   Medicamento  @relation(fields: [medicamentoId], references: [id], onDelete: Cascade)
+  horarioId     Int?
+  horario       Horario?     @relation(fields: [horarioId], references: [id])
+  dataHora      DateTime     @default(now())
+  status        StatusTomada
 }
