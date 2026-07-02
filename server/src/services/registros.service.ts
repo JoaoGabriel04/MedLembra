@@ -31,27 +31,23 @@ export async function criarRegistro(
   const dataHora = input.dataHora ? new Date(input.dataHora) : new Date()
 
   if (input.status === 'TOMADO') {
-    const [registro, updResult] = await prisma.$transaction(async (tx) => {
-      const [reg, upd] = await Promise.all([
-        tx.registroTomada.create({
-          data: {
-            medicamentoId,
-            horarioId: input.horarioId ?? null,
-            dataHora,
-            status: 'TOMADO'
-          }
-        }),
-        tx.medicamento.updateMany({
-          where: { id: medicamentoId, estoqueAtual: { gt: 0 } },
-          data: { estoqueAtual: { decrement: 1 } }
-        })
-      ])
-      return [reg, upd] as const
+    const registro = await prisma.$transaction(async (tx) => {
+      const upd = await tx.medicamento.updateMany({
+        where: { id: medicamentoId, estoqueAtual: { gt: 0 } },
+        data: { estoqueAtual: { decrement: 1 } }
+      })
+      if (upd.count === 0) {
+        throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
+      }
+      return tx.registroTomada.create({
+        data: {
+          medicamentoId,
+          horarioId: input.horarioId ?? null,
+          dataHora,
+          status: 'TOMADO'
+        }
+      })
     })
-
-    if (updResult.count === 0) {
-      throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
-    }
 
     const medAtualizado = await prisma.medicamento.findUnique({
       where: { id: medicamentoId },
