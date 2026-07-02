@@ -31,35 +31,38 @@ export async function criarRegistro(
   const dataHora = input.dataHora ? new Date(input.dataHora) : new Date()
 
   if (input.status === 'TOMADO') {
-    if (medicamento.estoqueAtual <= 0) {
-      throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
-    }
-
-    const [registro, medAtualizado] = await prisma.$transaction([
-      prisma.registroTomada.create({
-        data: {
-          medicamentoId,
-          horarioId: input.horarioId ?? null,
-          dataHora,
-          status: 'TOMADO'
-        }
-      }),
-      prisma.medicamento.update({
-        where: { id: medicamentoId },
-        data: { estoqueAtual: { decrement: 1 } },
-        select: { id: true, estoqueAtual: true }
-      })
-    ])
+    const result = await prisma.$transaction(async (tx) => {
+      const med = await tx.medicamento.findUnique({ where: { id: medicamentoId } })
+      if (!med || med.estoqueAtual <= 0) {
+        throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
+      }
+      const [registro, medAtualizado] = await Promise.all([
+        tx.registroTomada.create({
+          data: {
+            medicamentoId,
+            horarioId: input.horarioId ?? null,
+            dataHora,
+            status: 'TOMADO'
+          }
+        }),
+        tx.medicamento.update({
+          where: { id: medicamentoId },
+          data: { estoqueAtual: { decrement: 1 } },
+          select: { id: true, estoqueAtual: true }
+        })
+      ])
+      return { registro, medAtualizado }
+    })
 
     return {
       registro: {
-        id: registro.id,
-        medicamentoId: registro.medicamentoId,
-        horarioId: registro.horarioId,
-        dataHora: registro.dataHora.toISOString(),
-        status: registro.status
+        id: result.registro.id,
+        medicamentoId: result.registro.medicamentoId,
+        horarioId: result.registro.horarioId,
+        dataHora: result.registro.dataHora.toISOString(),
+        status: result.registro.status
       },
-      medicamento: medAtualizado
+      medicamento: result.medAtualizado
     }
   }
 
