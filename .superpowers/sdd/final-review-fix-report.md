@@ -46,10 +46,34 @@ No additional change required; addressed by Fix 1 (`updateMany` with a condition
 
 ---
 
+## Concern Resolution — Commit ed295a8
+
+**Concern 1 Fixed:** Orphaned TOMADO record when stock is zero at race time
+
+**Change:** Restructured the TOMADO branch to check `upd.count === 0` **inside** the transaction callback before creating the `registroTomada` record. Pattern:
+
+```typescript
+const registro = await prisma.$transaction(async (tx) => {
+  const upd = await tx.medicamento.updateMany({...})
+  if (upd.count === 0) {
+    throw new AppError(409, 'ESTOQUE_ZERADO', '...')
+  }
+  return tx.registroTomada.create({...})
+})
+```
+
+When stock is zero, the `throw` occurs inside the transaction callback, causing Prisma to roll back the entire transaction atomically. No orphaned records.
+
+**TypeScript:** `npx tsc --noEmit` produced no output (exit 0). ✓
+
+**Commit:** `ed295a8 fix: check stock count inside transaction to prevent orphaned registros`
+
+---
+
 ## Concern Summary
 
-| # | Concern | Severity |
-|---|---------|----------|
-| 1 | Fix 1 throws 409 after transaction commits — orphaned TOMADO record when stock is 0 at race time | Medium |
+All concerns resolved.
 
-Recommend moving the `if (updResult.count === 0) throw` check inside the `$transaction` callback so both the `registroTomada` insert and the error are rolled back together under zero-stock conditions.
+| # | Concern | Status |
+|---|---------|--------|
+| 1 | Fix 1 throws 409 after transaction commits — orphaned TOMADO record when stock is 0 at race time | RESOLVED (commit ed295a8) |

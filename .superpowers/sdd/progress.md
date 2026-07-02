@@ -31,6 +31,19 @@ Base commit (pré-execução): d008f84
 - [x] Fase 4 Task 1: Utils alertas (f0b91d3..fa1a010, review+fix: single Date() call)
 - [x] Fase 4 Task 2: Dashboard + Alertas (fa1a010..9dc8746, review+fix: NaN guard + null check)
 
+## Revisão Final (fa45a62..ed295a8)
+
+Aprovado para merge. Fixes adicionais aplicados:
+- fix: enforce stock atomicity, frequencia/horarios invariant, and no-duplicate-horarios (7207176)
+- fix: check stock count inside transaction to prevent orphaned registros (ed295a8)
+
+Minor restantes (aceitos para MVP):
+- horarioRegex aceita valores inválidos de hora (ex: "45:99")
+- dataValidade inválida não retorna 400 adequado
+- horarioId em POST /registros não é verificado contra o medicamento
+- PUT com horarios sozinho pode divergir de frequenciaDiaria no banco
+- post-transaction findUnique para estoqueAtual pode refletir valor de outra requisição concurrent
+
 ## Revisão Final Setup (d008f84..9ae9458)
 
 Aprovado com ressalvas. Findings:
