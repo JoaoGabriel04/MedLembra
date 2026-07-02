@@ -20,6 +20,9 @@ const criarSchema = z.object({
   horarios: z.array(z.string().regex(horarioRegex, 'formato HH:mm')).min(1)
 }).refine(d => d.horarios.length === d.frequenciaDiaria, {
   message: 'horarios.length deve ser igual a frequenciaDiaria'
+}).refine(d => new Set(d.horarios).size === d.horarios.length, {
+  message: 'horarios não pode ter duplicatas',
+  path: ['horarios']
 })
 
 const atualizarSchema = z.object({
@@ -35,6 +38,16 @@ const atualizarSchema = z.object({
   }
   return true
 }, { message: 'horarios.length deve ser igual a frequenciaDiaria' })
+.refine(d => {
+  if (d.frequenciaDiaria !== undefined && !d.horarios) {
+    return false
+  }
+  return true
+}, { message: 'ao alterar frequenciaDiaria, horarios deve ser fornecido' })
+.refine(d => !d.horarios || new Set(d.horarios).size === d.horarios.length, {
+  message: 'horarios não pode ter duplicatas',
+  path: ['horarios']
+})
 
 export async function criar(req: Request, res: Response, next: NextFunction): Promise<void> {
   const result = criarSchema.safeParse(req.body)

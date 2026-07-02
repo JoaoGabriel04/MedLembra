@@ -31,12 +31,8 @@ export async function criarRegistro(
   const dataHora = input.dataHora ? new Date(input.dataHora) : new Date()
 
   if (input.status === 'TOMADO') {
-    const result = await prisma.$transaction(async (tx) => {
-      const med = await tx.medicamento.findUnique({ where: { id: medicamentoId } })
-      if (!med || med.estoqueAtual <= 0) {
-        throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
-      }
-      const [registro, medAtualizado] = await Promise.all([
+    const [registro, updResult] = await prisma.$transaction(async (tx) => {
+      const [reg, upd] = await Promise.all([
         tx.registroTomada.create({
           data: {
             medicamentoId,
@@ -45,24 +41,32 @@ export async function criarRegistro(
             status: 'TOMADO'
           }
         }),
-        tx.medicamento.update({
-          where: { id: medicamentoId },
-          data: { estoqueAtual: { decrement: 1 } },
-          select: { id: true, estoqueAtual: true }
+        tx.medicamento.updateMany({
+          where: { id: medicamentoId, estoqueAtual: { gt: 0 } },
+          data: { estoqueAtual: { decrement: 1 } }
         })
       ])
-      return { registro, medAtualizado }
+      return [reg, upd] as const
+    })
+
+    if (updResult.count === 0) {
+      throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
+    }
+
+    const medAtualizado = await prisma.medicamento.findUnique({
+      where: { id: medicamentoId },
+      select: { id: true, estoqueAtual: true }
     })
 
     return {
       registro: {
-        id: result.registro.id,
-        medicamentoId: result.registro.medicamentoId,
-        horarioId: result.registro.horarioId,
-        dataHora: result.registro.dataHora.toISOString(),
-        status: result.registro.status
+        id: registro.id,
+        medicamentoId: registro.medicamentoId,
+        horarioId: registro.horarioId,
+        dataHora: registro.dataHora.toISOString(),
+        status: registro.status
       },
-      medicamento: result.medAtualizado
+      medicamento: medAtualizado!
     }
   }
 
