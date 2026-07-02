@@ -24,11 +24,8 @@ export interface AlertaValidadeProxima {
 export type Alerta = AlertaEstoqueBaixo | AlertaValidadeProxima
 
 export function calcularAlertas(medicamentos: MedParaAlerta[]): Alerta[] {
-  const hojeMs = Date.UTC(
-    new Date().getUTCFullYear(),
-    new Date().getUTCMonth(),
-    new Date().getUTCDate()
-  )
+  const now = new Date()
+  const hojeMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
 
   const alertas: Alerta[] = []
 
