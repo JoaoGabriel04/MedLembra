@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma'
+import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
 import { getInicio7DiasFortaleza } from '../utils/datas'
 import { calcularAlertas, Alerta } from '../utils/alertas'
@@ -10,6 +11,10 @@ export async function getDashboard(cuidadorId: number, idosoId: number) {
     where: { id: idosoId },
     select: { id: true, nome: true, email: true }
   })
+
+  if (!idoso) {
+    throw new AppError(404, 'NOT_FOUND', 'Idoso não encontrado')
+  }
 
   const medicamentos = await prisma.medicamento.findMany({
     where: { idosoId },
