@@ -1,7 +1,8 @@
 import { StatusTomada } from '@prisma/client'
-import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
+import * as medicamentosRepo from '../repositories/medicamentos.repository'
+import * as registrosRepo from '../repositories/registros.repository'
 
 interface CriarRegistroInput {
   status: StatusTomada
@@ -22,37 +23,18 @@ export async function criarRegistro(
   medicamentoId: number,
   input: CriarRegistroInput
 ) {
-  const medicamento = await prisma.medicamento.findUnique({ where: { id: medicamentoId } })
+  const medicamento = await medicamentosRepo.findById(medicamentoId)
   if (!medicamento) {
     throw new AppError(404, 'NOT_FOUND', 'Medicamento não encontrado')
   }
   await assertAccessToIdoso(userId, tipo, medicamento.idosoId)
 
   const dataHora = input.dataHora ? new Date(input.dataHora) : new Date()
+  const registroData = { horarioId: input.horarioId ?? null, dataHora }
 
   if (input.status === 'TOMADO') {
-    const registro = await prisma.$transaction(async (tx) => {
-      const upd = await tx.medicamento.updateMany({
-        where: { id: medicamentoId, estoqueAtual: { gt: 0 } },
-        data: { estoqueAtual: { decrement: 1 } }
-      })
-      if (upd.count === 0) {
-        throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
-      }
-      return tx.registroTomada.create({
-        data: {
-          medicamentoId,
-          horarioId: input.horarioId ?? null,
-          dataHora,
-          status: 'TOMADO'
-        }
-      })
-    })
-
-    const medAtualizado = await prisma.medicamento.findUnique({
-      where: { id: medicamentoId },
-      select: { id: true, estoqueAtual: true }
-    })
+    const registro = await registrosRepo.criarTomadoComDecremento(medicamentoId, registroData)
+    const medAtualizado = await medicamentosRepo.findEstoque(medicamentoId)
 
     return {
       registro: {
@@ -66,15 +48,7 @@ export async function criarRegistro(
     }
   }
 
-  // status === 'PULADO'
-  const registro = await prisma.registroTomada.create({
-    data: {
-      medicamentoId,
-      horarioId: input.horarioId ?? null,
-      dataHora,
-      status: 'PULADO'
-    }
-  })
+  const registro = await registrosRepo.criarPulado(medicamentoId, registroData)
 
   return {
     registro: {
@@ -94,32 +68,13 @@ export async function listarRegistros(
   medicamentoId: number,
   query: ListarRegistrosQuery
 ) {
-  const medicamento = await prisma.medicamento.findUnique({ where: { id: medicamentoId } })
+  const medicamento = await medicamentosRepo.findById(medicamentoId)
   if (!medicamento) {
     throw new AppError(404, 'NOT_FOUND', 'Medicamento não encontrado')
   }
   await assertAccessToIdoso(userId, tipo, medicamento.idosoId)
 
-  const where = {
-    medicamentoId,
-    ...(query.desde || query.ate ? {
-      dataHora: {
-        ...(query.desde && { gte: new Date(query.desde) }),
-        ...(query.ate && { lte: new Date(query.ate) })
-      }
-    } : {})
-  }
-
-  const [registros, total] = await Promise.all([
-    prisma.registroTomada.findMany({
-      where,
-      orderBy: { dataHora: 'desc' },
-      take: query.limit,
-      skip: query.offset,
-      select: { id: true, horarioId: true, dataHora: true, status: true }
-    }),
-    prisma.registroTomada.count({ where })
-  ])
+  const { registros, total } = await registrosRepo.findMany(medicamentoId, query)
 
   return {
     registros: registros.map(r => ({

@@ -7,6 +7,7 @@ import {
   atualizarMedicamento,
   deletarMedicamento
 } from '../services/medicamentos.service'
+import { zodErrorResponse, zIntParam } from '../lib/validation'
 
 const horarioRegex = /^\d{2}:\d{2}$/
 
@@ -52,7 +53,7 @@ const atualizarSchema = z.object({
 export async function criar(req: Request, res: Response, next: NextFunction): Promise<void> {
   const result = criarSchema.safeParse(req.body)
   if (!result.success) {
-    res.status(400).json({ error: 'VALIDATION_ERROR', message: 'Dados inválidos', details: result.error.flatten() })
+    res.status(400).json(zodErrorResponse(result.error))
     return
   }
   try {
@@ -70,30 +71,42 @@ export async function listar(req: Request, res: Response, next: NextFunction): P
 }
 
 export async function getUm(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const id = Number(req.params.id)
+  const paramResult = zIntParam.safeParse(req.params.id)
+  if (!paramResult.success) {
+    res.status(400).json(zodErrorResponse(paramResult.error))
+    return
+  }
   try {
-    const data = await getMedicamento(req.user!.id, req.user!.tipo, id)
+    const data = await getMedicamento(req.user!.id, req.user!.tipo, paramResult.data)
     res.json(data)
   } catch (err) { next(err) }
 }
 
 export async function atualizar(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const id = Number(req.params.id)
+  const paramResult = zIntParam.safeParse(req.params.id)
+  if (!paramResult.success) {
+    res.status(400).json(zodErrorResponse(paramResult.error))
+    return
+  }
   const result = atualizarSchema.safeParse(req.body)
   if (!result.success) {
-    res.status(400).json({ error: 'VALIDATION_ERROR', message: 'Dados inválidos', details: result.error.flatten() })
+    res.status(400).json(zodErrorResponse(result.error))
     return
   }
   try {
-    const data = await atualizarMedicamento(req.user!.id, req.user!.tipo, id, result.data)
+    const data = await atualizarMedicamento(req.user!.id, req.user!.tipo, paramResult.data, result.data)
     res.json(data)
   } catch (err) { next(err) }
 }
 
 export async function deletar(req: Request, res: Response, next: NextFunction): Promise<void> {
-  const id = Number(req.params.id)
+  const paramResult = zIntParam.safeParse(req.params.id)
+  if (!paramResult.success) {
+    res.status(400).json(zodErrorResponse(paramResult.error))
+    return
+  }
   try {
-    await deletarMedicamento(req.user!.id, req.user!.tipo, id)
+    await deletarMedicamento(req.user!.id, req.user!.tipo, paramResult.data)
     res.status(204).send()
   } catch (err) { next(err) }
 }

@@ -1,15 +1,8 @@
-import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
+import * as usuariosRepo from '../repositories/usuarios.repository'
 
 export async function getMe(userId: number) {
-  const usuario = await prisma.usuario.findUnique({
-    where: { id: userId },
-    include: {
-      cuidador: { select: { id: true, nome: true, email: true } },
-      idosos: { select: { id: true, nome: true, email: true } }
-    }
-  })
-
+  const usuario = await usuariosRepo.findById(userId)
   if (!usuario) {
     throw new AppError(404, 'NOT_FOUND', 'Usuário não encontrado')
   }

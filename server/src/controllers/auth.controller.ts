@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { registerUser, loginUser } from '../services/auth.service'
+import { zodErrorResponse } from '../lib/validation'
 
 const registerSchema = z.object({
   nome: z.string().min(1),
@@ -17,11 +18,7 @@ const loginSchema = z.object({
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   const result = registerSchema.safeParse(req.body)
   if (!result.success) {
-    res.status(400).json({
-      error: 'VALIDATION_ERROR',
-      message: 'Dados inválidos',
-      details: result.error.flatten()
-    })
+    res.status(400).json(zodErrorResponse(result.error))
     return
   }
 
@@ -36,11 +33,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   const result = loginSchema.safeParse(req.body)
   if (!result.success) {
-    res.status(400).json({
-      error: 'VALIDATION_ERROR',
-      message: 'Dados inválidos',
-      details: result.error.flatten()
-    })
+    res.status(400).json(zodErrorResponse(result.error))
     return
   }
 

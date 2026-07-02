@@ -1,7 +1,7 @@
-import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
 import { getHojeFortaleza } from '../utils/datas'
+import * as medicamentosRepo from '../repositories/medicamentos.repository'
 
 export async function getHoje(
   userId: number,
@@ -15,21 +15,7 @@ export async function getHoje(
   await assertAccessToIdoso(userId, tipo, idosoId!)
 
   const { inicio, fim, dataStr } = getHojeFortaleza()
-
-  const medicamentos = await prisma.medicamento.findMany({
-    where: { idosoId },
-    include: {
-      horarios: {
-        include: {
-          registros: {
-            where: { dataHora: { gte: inicio, lt: fim } },
-            orderBy: { dataHora: 'desc' },
-            take: 1
-          }
-        }
-      }
-    }
-  })
+  const medicamentos = await medicamentosRepo.findHojeComRegistros(idosoId!, inicio, fim)
 
   return {
     data: dataStr,

@@ -1,5 +1,8 @@
 import express from 'express'
 import dotenv from 'dotenv'
+import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import { authRoutes } from './routes/auth.routes'
 import { usuariosRoutes } from './routes/usuarios.routes'
 import { vinculosRoutes } from './routes/vinculos.routes'
@@ -13,14 +16,39 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3333
+const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173'
 
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'RATE_LIMIT_EXCEEDED', message: 'Muitas requisições. Tente novamente em alguns minutos.' }
+})
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'RATE_LIMIT_EXCEEDED', message: 'Muitas tentativas. Tente novamente em 15 minutos.' }
+})
+
+app.use(helmet())
+app.use(cors({
+  origin: CORS_ORIGIN,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
+app.use(globalLimiter)
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
 })
 
-app.use('/api/auth', authRoutes)
+app.use('/api/auth', authLimiter, authRoutes)
 app.use('/api/usuarios', usuariosRoutes)
 app.use('/api/vinculos', vinculosRoutes)
 app.use('/api/cuidador', cuidadorRoutes)

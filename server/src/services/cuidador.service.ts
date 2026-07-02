@@ -1,11 +1,8 @@
-import { prisma } from '../lib/prisma'
+import * as usuariosRepo from '../repositories/usuarios.repository'
 
 export async function listarIdosos(cuidadorId: number): Promise<{
   idosos: Array<{ id: number; nome: string; email: string }>
 }> {
-  const idosos = await prisma.usuario.findMany({
-    where: { cuidadorId },
-    select: { id: true, nome: true, email: true }
-  })
+  const idosos = await usuariosRepo.findIdososByCuidadorId(cuidadorId)
   return { idosos }
 }

@@ -1,35 +1,22 @@
-import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
 import { getInicio7DiasFortaleza } from '../utils/datas'
 import { calcularAlertas, Alerta } from '../utils/alertas'
+import * as usuariosRepo from '../repositories/usuarios.repository'
+import * as medicamentosRepo from '../repositories/medicamentos.repository'
+import * as registrosRepo from '../repositories/registros.repository'
 
 export async function getDashboard(cuidadorId: number, idosoId: number) {
   await assertAccessToIdoso(cuidadorId, 'CUIDADOR', idosoId)
 
-  const idoso = await prisma.usuario.findUnique({
-    where: { id: idosoId },
-    select: { id: true, nome: true, email: true }
-  })
-
+  const idoso = await usuariosRepo.findByIdSelect(idosoId)
   if (!idoso) {
     throw new AppError(404, 'NOT_FOUND', 'Idoso não encontrado')
   }
 
-  const medicamentos = await prisma.medicamento.findMany({
-    where: { idosoId },
-    select: { id: true, nome: true, estoqueAtual: true, frequenciaDiaria: true, dataValidade: true }
-  })
-
+  const medicamentos = await medicamentosRepo.findResumo(idosoId)
   const inicio7dias = getInicio7DiasFortaleza()
-
-  const registros = await prisma.registroTomada.findMany({
-    where: {
-      medicamento: { idosoId },
-      dataHora: { gte: inicio7dias }
-    },
-    select: { status: true }
-  })
+  const registros = await registrosRepo.findStatusSince(idosoId, inicio7dias)
 
   const totalTomadas = registros.filter(r => r.status === 'TOMADO').length
   const totalPuladas = registros.filter(r => r.status === 'PULADO').length
@@ -56,19 +43,11 @@ export async function getDashboard(cuidadorId: number, idosoId: number) {
 }
 
 export async function getAlertas(cuidadorId: number) {
-  const idosos = await prisma.usuario.findMany({
-    where: { cuidadorId },
-    select: { id: true, nome: true }
-  })
-
+  const idosos = await usuariosRepo.findIdososNomeByCuidadorId(cuidadorId)
   const todasAlertas: Array<Alerta & { idosoId: number; idosoNome: string }> = []
 
   for (const idoso of idosos) {
-    const medicamentos = await prisma.medicamento.findMany({
-      where: { idosoId: idoso.id },
-      select: { id: true, nome: true, estoqueAtual: true, frequenciaDiaria: true, dataValidade: true }
-    })
-
+    const medicamentos = await medicamentosRepo.findResumo(idoso.id)
     const alertas = calcularAlertas(medicamentos)
     for (const alerta of alertas) {
       todasAlertas.push({ idosoId: idoso.id, idosoNome: idoso.nome, ...alerta })

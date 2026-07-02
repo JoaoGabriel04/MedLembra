@@ -1,7 +1,7 @@
 import { Medicamento, Horario } from '@prisma/client'
-import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
+import * as medicamentosRepo from '../repositories/medicamentos.repository'
 
 type MedicamentoComHorarios = Medicamento & { horarios: Horario[] }
 
@@ -46,17 +46,14 @@ export async function criarMedicamento(
 ) {
   await assertAccessToIdoso(userId, tipo, input.idosoId)
 
-  const medicamento = await prisma.medicamento.create({
-    data: {
-      idosoId: input.idosoId,
-      nome: input.nome,
-      dosagem: input.dosagem,
-      frequenciaDiaria: input.frequenciaDiaria,
-      estoqueAtual: input.estoqueAtual,
-      dataValidade: new Date(input.dataValidade),
-      horarios: { create: input.horarios.map(hora => ({ hora })) }
-    },
-    include: { horarios: true }
+  const medicamento = await medicamentosRepo.create({
+    idosoId: input.idosoId,
+    nome: input.nome,
+    dosagem: input.dosagem,
+    frequenciaDiaria: input.frequenciaDiaria,
+    estoqueAtual: input.estoqueAtual,
+    dataValidade: new Date(input.dataValidade),
+    horarios: { create: input.horarios.map(hora => ({ hora })) }
   })
 
   return formatMedicamento(medicamento)
@@ -73,11 +70,7 @@ export async function listarMedicamentos(
   }
   await assertAccessToIdoso(userId, tipo, idosoId!)
 
-  const medicamentos = await prisma.medicamento.findMany({
-    where: { idosoId },
-    include: { horarios: true }
-  })
-
+  const medicamentos = await medicamentosRepo.findMany(idosoId!)
   return { medicamentos: medicamentos.map(formatMedicamento) }
 }
 
@@ -86,10 +79,7 @@ export async function getMedicamento(
   tipo: 'IDOSO' | 'CUIDADOR',
   id: number
 ) {
-  const medicamento = await prisma.medicamento.findUnique({
-    where: { id },
-    include: { horarios: true }
-  })
+  const medicamento = await medicamentosRepo.findById(id)
   if (!medicamento) {
     throw new AppError(404, 'NOT_FOUND', 'Medicamento não encontrado')
   }
@@ -104,7 +94,7 @@ export async function atualizarMedicamento(
   id: number,
   input: AtualizarMedicamentoInput
 ) {
-  const existing = await prisma.medicamento.findUnique({ where: { id } })
+  const existing = await medicamentosRepo.findById(id)
   if (!existing) {
     throw new AppError(404, 'NOT_FOUND', 'Medicamento não encontrado')
   }
@@ -114,26 +104,15 @@ export async function atualizarMedicamento(
     ? (input.frequenciaDiaria ?? input.horarios.length)
     : input.frequenciaDiaria
 
-  const medicamento = await prisma.$transaction(async tx => {
-    if (input.horarios) {
-      await tx.horario.deleteMany({ where: { medicamentoId: id } })
-    }
-    return tx.medicamento.update({
-      where: { id },
-      data: {
-        ...(input.nome !== undefined && { nome: input.nome }),
-        ...(input.dosagem !== undefined && { dosagem: input.dosagem }),
-        ...(novaFrequencia !== undefined && { frequenciaDiaria: novaFrequencia }),
-        ...(input.estoqueAtual !== undefined && { estoqueAtual: input.estoqueAtual }),
-        ...(input.dataValidade !== undefined && { dataValidade: new Date(input.dataValidade) }),
-        ...(input.horarios && {
-          horarios: { create: input.horarios.map(hora => ({ hora })) }
-        })
-      },
-      include: { horarios: true }
-    })
-  })
+  const updateData: medicamentosRepo.UpdateMedicamentoData = {
+    ...(input.nome !== undefined && { nome: input.nome }),
+    ...(input.dosagem !== undefined && { dosagem: input.dosagem }),
+    ...(novaFrequencia !== undefined && { frequenciaDiaria: novaFrequencia }),
+    ...(input.estoqueAtual !== undefined && { estoqueAtual: input.estoqueAtual }),
+    ...(input.dataValidade !== undefined && { dataValidade: new Date(input.dataValidade) })
+  }
 
+  const medicamento = await medicamentosRepo.updateComHorarios(id, updateData, input.horarios)
   return formatMedicamento(medicamento)
 }
 
@@ -142,10 +121,10 @@ export async function deletarMedicamento(
   tipo: 'IDOSO' | 'CUIDADOR',
   id: number
 ): Promise<void> {
-  const existing = await prisma.medicamento.findUnique({ where: { id } })
+  const existing = await medicamentosRepo.findById(id)
   if (!existing) {
     throw new AppError(404, 'NOT_FOUND', 'Medicamento não encontrado')
   }
   await assertAccessToIdoso(userId, tipo, existing.idosoId)
-  await prisma.medicamento.delete({ where: { id } })
+  await medicamentosRepo.remove(id)
 }

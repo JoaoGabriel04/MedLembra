@@ -1,5 +1,5 @@
-import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
+import * as usuariosRepo from '../repositories/usuarios.repository'
 
 export async function assertAccessToIdoso(
   userId: number,
@@ -12,7 +12,7 @@ export async function assertAccessToIdoso(
     }
     return
   }
-  const idoso = await prisma.usuario.findUnique({ where: { id: idosoId } })
+  const idoso = await usuariosRepo.findByIdParaAcesso(idosoId)
   if (!idoso) {
     throw new AppError(404, 'NOT_FOUND', 'Idoso não encontrado')
   }

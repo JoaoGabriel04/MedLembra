@@ -1,12 +1,12 @@
-import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
+import * as usuariosRepo from '../repositories/usuarios.repository'
 
 export async function criarVinculo(
   userId: number,
   tipoUser: 'IDOSO' | 'CUIDADOR',
   email: string
 ): Promise<{ vinculo: { idosoId: number; cuidadorId: number } }> {
-  const outro = await prisma.usuario.findUnique({ where: { email } })
+  const outro = await usuariosRepo.findByEmail(email)
   if (!outro) {
     throw new AppError(404, 'NOT_FOUND', 'Usuário não encontrado com esse email')
   }
@@ -26,10 +26,7 @@ export async function criarVinculo(
   const idosoId = tipoUser === 'IDOSO' ? userId : outro.id
   const cuidadorId = tipoUser === 'CUIDADOR' ? userId : outro.id
 
-  await prisma.usuario.update({
-    where: { id: idosoId },
-    data: { cuidadorId }
-  })
+  await usuariosRepo.setCuidador(idosoId, cuidadorId)
 
   return { vinculo: { idosoId, cuidadorId } }
 }

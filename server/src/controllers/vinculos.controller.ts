@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
 import { criarVinculo } from '../services/vinculos.service'
+import { zodErrorResponse } from '../lib/validation'
 
 const vinculoSchema = z.object({
   email: z.string().email()
@@ -9,11 +10,7 @@ const vinculoSchema = z.object({
 export async function criar(req: Request, res: Response, next: NextFunction): Promise<void> {
   const result = vinculoSchema.safeParse(req.body)
   if (!result.success) {
-    res.status(400).json({
-      error: 'VALIDATION_ERROR',
-      message: 'Dados inválidos',
-      details: result.error.flatten()
-    })
+    res.status(400).json(zodErrorResponse(result.error))
     return
   }
 

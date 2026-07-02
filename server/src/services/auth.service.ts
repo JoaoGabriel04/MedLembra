@@ -1,8 +1,8 @@
 import { TipoUsuario } from '@prisma/client'
-import { prisma } from '../lib/prisma'
 import { hashSenha, compareSenha } from '../lib/bcrypt'
 import { signToken } from '../lib/jwt'
 import { AppError } from '../lib/errors'
+import * as usuariosRepo from '../repositories/usuarios.repository'
 
 interface RegisterInput {
   nome: string
@@ -27,19 +27,17 @@ interface AuthResult {
 }
 
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
-  const existing = await prisma.usuario.findUnique({ where: { email: input.email } })
+  const existing = await usuariosRepo.findByEmail(input.email)
   if (existing) {
     throw new AppError(409, 'EMAIL_DUPLICADO', 'Email já cadastrado')
   }
 
   const hash = await hashSenha(input.senha)
-  const usuario = await prisma.usuario.create({
-    data: {
-      nome: input.nome,
-      email: input.email,
-      senha: hash,
-      tipo: input.tipo
-    }
+  const usuario = await usuariosRepo.create({
+    nome: input.nome,
+    email: input.email,
+    senha: hash,
+    tipo: input.tipo
   })
 
   const token = signToken({ sub: usuario.id, tipo: usuario.tipo })
@@ -50,7 +48,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
 }
 
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
-  const usuario = await prisma.usuario.findUnique({ where: { email: input.email } })
+  const usuario = await usuariosRepo.findByEmail(input.email)
   if (!usuario) {
     throw new AppError(401, 'CREDENCIAIS_INVALIDAS', 'Credenciais inválidas')
   }
