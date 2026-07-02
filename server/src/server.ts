@@ -6,6 +6,7 @@ import { vinculosRoutes } from './routes/vinculos.routes'
 import { cuidadorRoutes } from './routes/cuidador.routes'
 import { medicamentosRoutes } from './routes/medicamentos.routes'
 import { registrosRoutes } from './routes/registros.routes'
+import { idosoRoutes } from './routes/idoso.routes'
 import { errorHandler } from './middlewares/error.middleware'
 
 dotenv.config()
@@ -25,6 +26,7 @@ app.use('/api/vinculos', vinculosRoutes)
 app.use('/api/cuidador', cuidadorRoutes)
 app.use('/api/medicamentos', medicamentosRoutes)
 app.use('/api/medicamentos/:id/registros', registrosRoutes)
+app.use('/api/idoso', idosoRoutes)
 
 app.use(errorHandler)
 
