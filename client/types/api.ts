@@ -52,9 +52,9 @@ export interface MedicamentosResponse {
   medicamentos: Medicamento[]
 }
 
-export interface MedicamentoResponse {
-  medicamento: Medicamento
-}
+// GET/POST/PUT de um medicamento retornam o objeto direto, sem envelope
+// (INSTRUCOES_API.md 5.3: "mesmo formato de um item de GET /medicamentos")
+export type MedicamentoResponse = Medicamento
 
 export interface CriarMedicamentoInput {
   nome: string

@@ -2,51 +2,104 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* MedLembra design tokens */
 @theme {
-  --color-bg: #FAFAF9;
-  --color-surface: #F5F5F4;
-  --color-border: #D6D3D1;
-  --color-text: #292524;
-  --color-accent: #0F766E;
-  --color-text-muted: #78716C;
-  --color-accent-hover: #134E4A;
-  --color-warning: #B45309;
+  /* --- Radius --- */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-card:     0 1px 3px rgba(17,24,39,0.06), 0 1px 2px rgba(17,24,39,0.04);
+  --shadow-elevated: 0 8px 24px rgba(17,24,39,0.08), 0 2px 6px rgba(17,24,39,0.04);
+
+  /* --- Cores base --- */
+  --color-bg:            #F7F8FA;
+  --color-surface:       #FFFFFF;
+  --color-surface-alt:   #F9FAFB;
+  --color-border:        #E5E7EB;
+  --color-border-strong: #D1D5DB;
+
+  /* --- Texto --- */
+  --color-text:          #111827;
+  --color-text-muted:    #6B7280;
+  --color-text-label:    #9CA3AF;
+
+  /* --- Marca --- */
+  --color-primary:       #3B5DE7;
+  --color-primary-hover: #2E4BC9;
+  --color-accent:        #8B5CF6;
+  --color-accent-hover:  #7C3AED;
+
+  /* --- Semânticos --- */
+  --color-success:       #10B981;
+  --color-success-bg:    #D1FAE5;
+  --color-warning:       #F59E0B;
+  --color-warning-bg:    #FEF3C7;
+  --color-muted-icon:    #9CA3AF;
+
+  /* --- Fonte --- */
   --font-sans: var(--font-inter);
 }
 
-:root {
-  --radius: 0.25rem;
+/*
+  @theme inline faz o mapeamento dos tokens shadcn (:root) para utilities do TW v4.
+  Sem isso, bg-card / bg-background / text-foreground etc. não geram CSS.
+*/
+@theme inline {
+  --color-background:       var(--background);
+  --color-foreground:       var(--foreground);
+  --color-card:             var(--card);
+  --color-card-foreground:  var(--card-foreground);
+  --color-popover:          var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary:        var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:            var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive:      var(--destructive);
+  --color-input:            var(--input);
+  --color-ring:             var(--ring);
+}
 
-  /* shadcn semantic tokens mapeados para paleta MedLembra */
-  --background: #FAFAF9;
-  --foreground: #292524;
-  --card: #F5F5F4;
-  --card-foreground: #292524;
-  --popover: #FAFAF9;
-  --popover-foreground: #292524;
-  --primary: #0F766E;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F5F5F4;
-  --secondary-foreground: #292524;
-  --muted: #F5F5F4;
-  --muted-foreground: #78716C;
-  --accent: #F5F5F4;
-  --accent-foreground: #292524;
-  --destructive: #DC2626;
-  --border: #D6D3D1;
-  --input: #D6D3D1;
-  --ring: #0F766E;
+:root {
+  /* shadcn base radius */
+  --radius: 12px;
+
+  /* Gradientes (referenciados via var() nos componentes) */
+  --gradient-primary:       linear-gradient(135deg, #3B5DE7 0%, #8B5CF6 100%);
+  --gradient-hero-login:    linear-gradient(135deg, #3B5DE7 0%, #4C6FE7 60%, #6D5EE6 100%);
+  --gradient-hero-register: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
+  --gradient-alert-card:    linear-gradient(135deg, #8B5CF6 0%, #6D5EE6 100%);
+
+  /* shadcn semantic tokens — mapeados para nova paleta */
+  --background:            #F7F8FA;
+  --foreground:            #111827;
+  --card:                  #FFFFFF;
+  --card-foreground:       #111827;
+  --popover:               #FFFFFF;
+  --popover-foreground:    #111827;
+  --primary:               #3B5DE7;
+  --primary-foreground:    #FFFFFF;
+  --secondary:             #F9FAFB;
+  --secondary-foreground:  #111827;
+  --muted:                 #F9FAFB;
+  --muted-foreground:      #6B7280;
+  --accent:                #F9FAFB;
+  --accent-foreground:     #111827;
+  --destructive:           #DC2626;
+  --border:                #E5E7EB;
+  --input:                 #E5E7EB;
+  --ring:                  #3B5DE7;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
   }
   html {
-    @apply font-sans;
+    font-family: var(--font-sans);
   }
 }
