@@ -14,9 +14,19 @@ import { errorHandler } from './middlewares/error.middleware'
 
 dotenv.config()
 
+const corsURLs = [
+  'http://localhost:3000',
+  'https://intercarpellary-bess-subdenticulated.ngrok-free.dev'
+]
+
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET obrigatório no .env')
+  process.exit(1)
+}
+
 const app = express()
 const PORT = process.env.PORT || 3333
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173'
+const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000'
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -55,6 +65,10 @@ app.use('/api/cuidador', cuidadorRoutes)
 app.use('/api/medicamentos', medicamentosRoutes)
 app.use('/api/medicamentos/:id/registros', registrosRoutes)
 app.use('/api/idoso', idosoRoutes)
+
+app.use((_req, res) => {
+  res.status(404).json({ error: 'NOT_FOUND', message: 'Rota não encontrada' })
+})
 
 app.use(errorHandler)
 

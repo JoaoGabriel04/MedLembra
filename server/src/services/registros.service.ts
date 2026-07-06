@@ -1,6 +1,7 @@
 import { StatusTomada } from '@prisma/client'
 import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
+import { getHojeFortaleza } from '../utils/datas'
 import * as medicamentosRepo from '../repositories/medicamentos.repository'
 import * as registrosRepo from '../repositories/registros.repository'
 
@@ -30,12 +31,45 @@ export async function criarRegistro(
   await assertAccessToIdoso(userId, tipo, medicamento.idosoId)
 
   const dataHora = input.dataHora ? new Date(input.dataHora) : new Date()
+
+  if (input.horarioId != null) {
+    const { inicio, fim } = getHojeFortaleza()
+    const existente = await registrosRepo.findByHorarioNoDia(input.horarioId, inicio, fim)
+
+    if (existente) {
+      if (existente.status !== input.status) {
+        const { registro, medicamento: med } = await registrosRepo.atualizarComAjusteEstoque(
+          existente.id, medicamentoId, existente.status, input.status, dataHora
+        )
+        return {
+          registro: {
+            id: registro.id,
+            medicamentoId: registro.medicamentoId,
+            horarioId: registro.horarioId,
+            dataHora: registro.dataHora.toISOString(),
+            status: registro.status
+          },
+          medicamento: med
+        }
+      }
+      const med = await medicamentosRepo.findEstoque(medicamentoId)
+      return {
+        registro: {
+          id: existente.id,
+          medicamentoId: existente.medicamentoId,
+          horarioId: existente.horarioId,
+          dataHora: existente.dataHora.toISOString(),
+          status: existente.status
+        },
+        medicamento: med!
+      }
+    }
+  }
+
   const registroData = { horarioId: input.horarioId ?? null, dataHora }
 
   if (input.status === 'TOMADO') {
-    const registro = await registrosRepo.criarTomadoComDecremento(medicamentoId, registroData)
-    const medAtualizado = await medicamentosRepo.findEstoque(medicamentoId)
-
+    const { registro, medicamento: medAtualizado } = await registrosRepo.criarTomadoComDecremento(medicamentoId, registroData)
     return {
       registro: {
         id: registro.id,
@@ -44,12 +78,11 @@ export async function criarRegistro(
         dataHora: registro.dataHora.toISOString(),
         status: registro.status
       },
-      medicamento: medAtualizado!
+      medicamento: medAtualizado
     }
   }
 
   const registro = await registrosRepo.criarPulado(medicamentoId, registroData)
-
   return {
     registro: {
       id: registro.id,

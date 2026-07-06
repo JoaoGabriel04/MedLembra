@@ -14,14 +14,13 @@ enum TipoUsuario {
 enum StatusTomada {
   TOMADO
   PULADO
-  PENDENTE
 }
 
 model Usuario {
   id           Int         @id @default(autoincrement())
   nome         String
   email        String      @unique
-  senha        String
+  senhaHash    String      @map("senha_hash")
   tipo         TipoUsuario
 
   cuidadorId   Int?

@@ -1,3 +1,4 @@
+import { StatusTomada } from '@prisma/client'
 import { prisma } from '../lib/prisma'
 import { AppError } from '../lib/errors'
 
@@ -13,14 +14,14 @@ export async function criarTomadoComDecremento(
     if (upd.count === 0) {
       throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
     }
-    return tx.registroTomada.create({
-      data: {
-        medicamentoId,
-        horarioId: data.horarioId ?? null,
-        dataHora: data.dataHora,
-        status: 'TOMADO'
-      }
+    const registro = await tx.registroTomada.create({
+      data: { medicamentoId, horarioId: data.horarioId ?? null, dataHora: data.dataHora, status: 'TOMADO' }
     })
+    const medicamento = await tx.medicamento.findUnique({
+      where: { id: medicamentoId },
+      select: { id: true, estoqueAtual: true }
+    })
+    return { registro, medicamento: medicamento! }
   })
 }
 
@@ -64,6 +65,47 @@ export async function findMany(
   ])
 
   return { registros, total }
+}
+
+export async function findByHorarioNoDia(horarioId: number, inicio: Date, fim: Date) {
+  return prisma.registroTomada.findFirst({
+    where: { horarioId, dataHora: { gte: inicio, lt: fim } }
+  })
+}
+
+export async function atualizarComAjusteEstoque(
+  registroId: number,
+  medicamentoId: number,
+  statusAnterior: StatusTomada,
+  novoStatus: StatusTomada,
+  dataHora: Date
+) {
+  return prisma.$transaction(async tx => {
+    if (statusAnterior === 'TOMADO' && novoStatus === 'PULADO') {
+      await tx.medicamento.update({
+        where: { id: medicamentoId },
+        data: { estoqueAtual: { increment: 1 } }
+      })
+    } else if (statusAnterior === 'PULADO' && novoStatus === 'TOMADO') {
+      const upd = await tx.medicamento.updateMany({
+        where: { id: medicamentoId, estoqueAtual: { gt: 0 } },
+        data: { estoqueAtual: { decrement: 1 } }
+      })
+      if (upd.count === 0) {
+        throw new AppError(409, 'ESTOQUE_ZERADO', 'Estoque insuficiente para registrar tomada')
+      }
+    }
+
+    const registro = await tx.registroTomada.update({
+      where: { id: registroId },
+      data: { status: novoStatus, dataHora }
+    })
+    const medicamento = await tx.medicamento.findUnique({
+      where: { id: medicamentoId },
+      select: { id: true, estoqueAtual: true }
+    })
+    return { registro, medicamento: medicamento! }
+  })
 }
 
 export async function findStatusSince(idosoId: number, since: Date) {

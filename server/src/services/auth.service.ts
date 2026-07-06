@@ -36,7 +36,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
   const usuario = await usuariosRepo.create({
     nome: input.nome,
     email: input.email,
-    senha: hash,
+    senhaHash: hash,
     tipo: input.tipo
   })
 
@@ -53,7 +53,7 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
     throw new AppError(401, 'CREDENCIAIS_INVALIDAS', 'Credenciais inválidas')
   }
 
-  const valid = await compareSenha(input.senha, usuario.senha)
+  const valid = await compareSenha(input.senha, usuario.senhaHash)
   if (!valid) {
     throw new AppError(401, 'CREDENCIAIS_INVALIDAS', 'Credenciais inválidas')
   }

@@ -5,13 +5,17 @@ export type JwtPayload = {
   tipo: 'IDOSO' | 'CUIDADOR'
 }
 
-const SECRET = process.env.JWT_SECRET!
-const EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+function secret(): string {
+  const s = process.env.JWT_SECRET
+  if (!s) throw new Error('JWT_SECRET not configured')
+  return s
+}
 
 export function signToken(payload: JwtPayload): string {
-  return jwt.sign(payload, SECRET, { expiresIn: EXPIRES_IN as jwt.SignOptions['expiresIn'] })
+  const expiresIn = (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn']
+  return jwt.sign(payload, secret(), { expiresIn })
 }
 
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, SECRET) as unknown as JwtPayload
+  return jwt.verify(token, secret()) as unknown as JwtPayload
 }

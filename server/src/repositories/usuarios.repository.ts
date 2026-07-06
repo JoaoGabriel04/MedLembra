@@ -29,7 +29,7 @@ export async function findByIdSelect(id: number) {
   })
 }
 
-export async function create(data: { nome: string; email: string; senha: string; tipo: TipoUsuario }) {
+export async function create(data: { nome: string; email: string; senhaHash: string; tipo: TipoUsuario }) {
   return prisma.usuario.create({ data })
 }
 

@@ -52,3 +52,10 @@ Aprovado com ressalvas. Findings:
 - [Minor] Sem CORS — adicionar na primeira feature que conectar ao client
 - [Minor] Sem error handler centralizado — adicionar na primeira feature
 - [Minor] nodemon sem --transpile-only — performance, baixo risco agora
+
+## Fase A — Fundação Frontend (BASE: 278f9ce)
+
+- [x] A1: Install deps + shadcn init (commits 278f9ce..3eb298f, review clean — Minor: button.tsx auto-gerado, layout.tsx/globals.css overwritten por shadcn, handoff p/A2)
+- [x] A2: Design system + project structure (commits 3eb298f..526a092, review clean)
+- [x] A3: Types + data layer (commits 526a092..9c5f6ca, review clean — Minor: AlertaGlobal brief tinha TS inválido, corrigido para type intersection)
+- [x] A4: Auth store + AuthGuard + root pages (commits 9c5f6ca..3414325, review clean + fix crítico: login agora escreve em localStorage.token para api.ts ler)
