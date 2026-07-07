@@ -25,21 +25,15 @@ export const useAuthStore = create<AuthState>()(
       usuario: null,
       hidratado: false,
       login: (token, usuario) => {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('medlembra.token', token)
-        }
         set({ token, usuario })
       },
       logout: () => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('medlembra.token')
-        }
         set({ token: null, usuario: null })
       },
       setHidratado: () => set({ hidratado: true }),
     }),
     {
-      name: 'medlembra-auth',
+      name: 'medismart-auth',
       onRehydrateStorage: () => (state) => {
         state?.setHidratado()
       },

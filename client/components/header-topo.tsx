@@ -43,7 +43,7 @@ export function HeaderTopo() {
         >
           <Pill className="size-4 text-white" />
         </div>
-        <span className="text-lg font-bold text-foreground">MedLembra</span>
+        <span className="text-lg font-bold text-foreground">MediSmart</span>
       </Link>
 
       {/* Nav central */}

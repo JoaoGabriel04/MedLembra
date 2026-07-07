@@ -1,4 +1,4 @@
-# MedLembra
+# MediSmart
 
 Sistema web de gestão de medicamentos de uso contínuo para idosos. Permite que cuidadores cadastrem medicamentos e acompanhem a adesão, enquanto o idoso vê uma tela simples com o checklist do dia.
 
@@ -47,7 +47,7 @@ Sistema web de gestão de medicamentos de uso contínuo para idosos. Permite que
 ## Estrutura do projeto
 
 ```
-MedLembra/
+MediSmart/
 ├── server/           # API REST
 │   ├── prisma/
 │   │   ├── schema.prisma
