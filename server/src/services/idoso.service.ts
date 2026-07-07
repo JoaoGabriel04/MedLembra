@@ -2,6 +2,7 @@ import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
 import { getHojeFortaleza } from '../utils/datas'
 import * as medicamentosRepo from '../repositories/medicamentos.repository'
+import { calcularAlertas } from '../utils/alertas'
 
 export async function getHoje(
   userId: number,
@@ -36,4 +37,10 @@ export async function getHoje(
       })
     }))
   }
+}
+
+export async function getAlertasIdoso(idosoId: number) {
+  const medicamentos = await medicamentosRepo.findResumo(idosoId)
+  const alertas = calcularAlertas(medicamentos)
+  return { alertas }
 }

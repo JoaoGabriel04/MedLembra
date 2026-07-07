@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { z } from 'zod'
-import { getHoje } from '../services/idoso.service'
+import { getHoje, getAlertasIdoso } from '../services/idoso.service'
 import { zodErrorResponse } from '../lib/validation'
 
 const hojeQuerySchema = z.object({
@@ -15,6 +15,13 @@ export async function hoje(req: Request, res: Response, next: NextFunction): Pro
   }
   try {
     const data = await getHoje(req.user!.id, req.user!.tipo, result.data.idosoId)
+    res.json(data)
+  } catch (err) { next(err) }
+}
+
+export async function alertasIdoso(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await getAlertasIdoso(req.user!.id)
     res.json(data)
   } catch (err) { next(err) }
 }
