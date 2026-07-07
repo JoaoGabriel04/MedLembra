@@ -60,3 +60,7 @@ export async function updateFotoUrl(id: number, fotoUrl: string | null): Promise
     data: { fotoUrl }
   })
 }
+
+export async function setEmailVerificado(id: number): Promise<void> {
+  await prisma.usuario.update({ where: { id }, data: { emailVerificado: true } })
+}

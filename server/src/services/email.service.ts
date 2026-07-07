@@ -42,3 +42,29 @@ export async function enviarAlertaEmail(params: {
     html
   })
 }
+
+export async function enviarCodigoVerificacao(params: {
+  email: string
+  nome: string
+  codigo: string
+}): Promise<void> {
+  const { email, nome, codigo } = params
+  const html = `
+    <h2 style="color:#3b5de7;">MediSmart — Verificação de E-mail</h2>
+    <p>Olá, <strong>${nome}</strong>! Bem-vindo ao MediSmart.</p>
+    <p>Seu código de verificação é:</p>
+    <div style="font-size:40px;font-weight:bold;letter-spacing:10px;text-align:center;padding:20px;background:#f1f5f9;border-radius:8px;margin:20px 0;">
+      ${codigo}
+    </div>
+    <p>Este código é válido por <strong>15 minutos</strong>.</p>
+    <p>Se você não criou uma conta no MediSmart, ignore este e-mail.</p>
+    <hr />
+    <p style="color:#888;font-size:12px;">MediSmart — gerenciamento de medicamentos para idosos.</p>
+  `
+  await resend.emails.send({
+    from: FROM,
+    to: [email],
+    subject: 'Seu código de verificação MediSmart',
+    html
+  })
+}
