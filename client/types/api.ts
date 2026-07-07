@@ -153,3 +153,8 @@ export interface DashboardResponse {
 export interface AlertasResponse {
   alertas: AlertaGlobal[]
 }
+
+// /idoso/alertas
+export interface IdosoAlertasResponse {
+  alertas: Alerta[]
+}

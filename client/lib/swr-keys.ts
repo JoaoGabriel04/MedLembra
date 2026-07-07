@@ -7,4 +7,5 @@ export const swrKeys = {
   medicamento: (id: number) => `/medicamentos/${id}`,
   dashboard: (idosoId: number) => `/cuidador/dashboard/${idosoId}`,
   alertas: () => '/cuidador/alertas',
+  idosoAlertas: () => '/idoso/alertas',
 }
