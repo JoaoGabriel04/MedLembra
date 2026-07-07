@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import { CalendarClock, PackageOpen, Pill, TrendingUp } from 'lucide-react'
+import { CalendarClock, FileDown, Loader2, PackageOpen, Pill, TrendingUp } from 'lucide-react'
 import { useDashboard } from '@/hooks/use-dashboard'
 import { GraficoAdesao } from '@/components/cuidador/grafico-adesao'
+import { BASE } from '@/lib/api'
+import { useAuthStore } from '@/lib/auth-store'
 import type { Alerta } from '@/types/api'
 
 function SummaryCard({
@@ -62,6 +65,32 @@ export default function DashboardPage() {
   const { id } = useParams<{ id: string }>()
   const idosoId = Number(id)
   const { data, isLoading } = useDashboard(idosoId)
+  const [exportando, setExportando] = useState(false)
+  const token = useAuthStore((s) => s.token)
+
+  async function exportarRelatorio() {
+    setExportando(true)
+    try {
+      const res = await fetch(`${BASE}/cuidador/dashboard/${idosoId}/relatorio?periodo=7`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!res.ok) throw new Error('Falha ao gerar relatório')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `relatorio-${idosoId}-${new Date().toISOString().slice(0, 10)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      // toast is not available here — just log
+      console.error('Erro ao exportar relatório')
+    } finally {
+      setExportando(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -82,6 +111,21 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={exportarRelatorio}
+          disabled={exportando}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-foreground hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {exportando
+            ? <Loader2 className="size-4 animate-spin" />
+            : <FileDown className="size-4" />
+          }
+          {exportando ? 'Gerando relatório...' : 'Exportar relatório'}
+        </button>
+      </div>
+
       {/* 3 cards de resumo */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <SummaryCard title="Medicamentos" value={resumo.totalMedicamentos} icon={Pill} />
