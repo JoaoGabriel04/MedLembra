@@ -9,8 +9,8 @@ export async function findById(id: number) {
   return prisma.usuario.findUnique({
     where: { id },
     include: {
-      cuidador: { select: { id: true, nome: true, email: true } },
-      idosos: { select: { id: true, nome: true, email: true } }
+      cuidador: { select: { id: true, nome: true, email: true, fotoUrl: true } },
+      idosos: { select: { id: true, nome: true, email: true, fotoUrl: true } }
     }
   })
 }
@@ -36,7 +36,7 @@ export async function create(data: { nome: string; email: string; senhaHash: str
 export async function findIdososByCuidadorId(cuidadorId: number) {
   return prisma.usuario.findMany({
     where: { cuidadorId },
-    select: { id: true, nome: true, email: true }
+    select: { id: true, nome: true, email: true, fotoUrl: true }
   })
 }
 
@@ -51,5 +51,12 @@ export async function setCuidador(idosoId: number, cuidadorId: number) {
   return prisma.usuario.update({
     where: { id: idosoId },
     data: { cuidadorId }
+  })
+}
+
+export async function updateFotoUrl(id: number, fotoUrl: string | null): Promise<void> {
+  await prisma.usuario.update({
+    where: { id },
+    data: { fotoUrl }
   })
 }
