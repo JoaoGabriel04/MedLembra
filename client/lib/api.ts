@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:7000/api'
+import { useAuthStore } from '@/lib/auth-store'
+
+export const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333/api'
 
 export class ApiError extends Error {
   constructor(
@@ -13,10 +15,7 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const token =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('medlembra.token')
-      : null
+  const token = useAuthStore.getState().token
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -27,9 +26,8 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { ...init, headers })
 
   if (res.status === 401) {
+    useAuthStore.getState().logout()
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('medlembra.token')
-      localStorage.removeItem('medlembra-auth')
       window.location.replace('/login')
     }
     throw new ApiError(401, 'UNAUTHORIZED', 'Sessão expirada')

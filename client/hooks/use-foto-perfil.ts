@@ -1,9 +1,7 @@
 import { mutate } from 'swr'
 import { useAuthStore } from '@/lib/auth-store'
 import { swrKeys } from '@/lib/swr-keys'
-import { ApiError } from '@/lib/api'
-
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333/api'
+import { ApiError, BASE } from '@/lib/api'
 
 export function useFotoPerfil() {
   const token = useAuthStore((s) => s.token)

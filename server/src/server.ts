@@ -14,11 +14,6 @@ import { errorHandler } from './middlewares/error.middleware'
 
 dotenv.config()
 
-const corsURLs = [
-  'http://localhost:3000',
-  'https://intercarpellary-bess-subdenticulated.ngrok-free.dev'
-]
-
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET obrigatório no .env')
   process.exit(1)
