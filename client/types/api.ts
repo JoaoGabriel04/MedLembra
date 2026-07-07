@@ -17,18 +17,26 @@ export interface AuthResponse {
 }
 
 // /usuarios/me
+export interface UsuarioBasico {
+  id: number
+  nome: string
+  email: string
+  fotoUrl: string | null
+}
+
 export interface MeResponse {
   id: number
   nome: string
   email: string
   tipo: TipoUsuario
-  cuidador: { id: number; nome: string; email: string } | null
-  idosos: Array<{ id: number; nome: string; email: string }>
+  fotoUrl: string | null
+  cuidador: UsuarioBasico | null
+  idosos: UsuarioBasico[]
 }
 
 // Cuidador
 export interface CuidadorIdososResponse {
-  idosos: Array<{ id: number; nome: string; email: string }>
+  idosos: UsuarioBasico[]
 }
 
 // Medicamentos

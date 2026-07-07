@@ -7,6 +7,7 @@ interface AuthUsuario {
   nome: string
   email: string
   tipo: TipoUsuario
+  fotoUrl?: string | null
 }
 
 interface AuthState {
@@ -16,6 +17,7 @@ interface AuthState {
   login: (token: string, usuario: AuthUsuario) => void
   logout: () => void
   setHidratado: () => void
+  setFotoUrl: (fotoUrl: string | null) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -31,6 +33,10 @@ export const useAuthStore = create<AuthState>()(
         set({ token: null, usuario: null })
       },
       setHidratado: () => set({ hidratado: true }),
+      setFotoUrl: (fotoUrl) =>
+        set((state) =>
+          state.usuario ? { usuario: { ...state.usuario, fotoUrl } } : {}
+        ),
     }),
     {
       name: 'medismart-auth',
