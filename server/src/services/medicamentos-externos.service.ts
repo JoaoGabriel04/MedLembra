@@ -38,6 +38,7 @@ export async function buscarMedicamentosExternos(q: string): Promise<ResultadoEx
     if (!res.ok) throw new Error(`openFDA status ${res.status}`)
     data = await res.json()
   } catch (err) {
+    console.error('[openFDA] falha na consulta:', err)
     throw Object.assign(new Error('Falha ao consultar API externa'), { statusCode: 502 })
   }
 
