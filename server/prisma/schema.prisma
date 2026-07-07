@@ -27,13 +27,15 @@ model Usuario {
   email        String      @unique
   senhaHash    String      @map("senha_hash")
   tipo         TipoUsuario
-  fotoUrl      String?     @map("foto_url")
+  fotoUrl          String?     @map("foto_url")
+  emailVerificado  Boolean     @default(false) @map("email_verificado")
 
   cuidadorId   Int?
   cuidador     Usuario?    @relation("CuidadorIdosos", fields: [cuidadorId], references: [id])
   idosos       Usuario[]   @relation("CuidadorIdosos")
 
-  medicamentos Medicamento[]
+  medicamentos       Medicamento[]
+  codigosVerificacao CodigoVerificacao[]
 
   criadoEm    DateTime    @default(now())
   atualizadoEm DateTime   @updatedAt
@@ -94,4 +96,17 @@ model MedicamentoReferencia {
 
   @@index([nome])
   @@map("medicamentos_referencia")
+}
+
+model CodigoVerificacao {
+  id        Int       @id @default(autoincrement())
+  usuarioId Int       @map("usuario_id")
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  codigo    String    @db.VarChar(6)
+  expiraEm  DateTime  @map("expira_em")
+  usadoEm   DateTime? @map("usado_em")
+  criadoEm  DateTime  @default(now()) @map("criado_em")
+
+  @@index([usuarioId])
+  @@map("codigos_verificacao")
 }
