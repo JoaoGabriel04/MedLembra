@@ -16,6 +16,11 @@ enum StatusTomada {
   PULADO
 }
 
+enum TipoAlerta {
+  ESTOQUE_BAIXO
+  VALIDADE_PROXIMA
+}
+
 model Usuario {
   id           Int         @id @default(autoincrement())
   nome         String
@@ -44,8 +49,9 @@ model Medicamento {
   estoqueAtual     Int
   dataValidade     DateTime @db.Date
 
-  horarios         Horario[]
-  registros        RegistroTomada[]
+  horarios           Horario[]
+  registros          RegistroTomada[]
+  alertasNotificados AlertaNotificado[]
 
   criadoEm        DateTime @default(now())
   atualizadoEm    DateTime @updatedAt
@@ -68,4 +74,16 @@ model RegistroTomada {
   horario       Horario?     @relation(fields: [horarioId], references: [id])
   dataHora      DateTime     @default(now())
   status        StatusTomada
+}
+
+model AlertaNotificado {
+  id            Int         @id @default(autoincrement())
+  medicamentoId Int         @map("medicamento_id")
+  medicamento   Medicamento @relation(fields: [medicamentoId], references: [id], onDelete: Cascade)
+
+  tipo         TipoAlerta
+  notificadoEm DateTime    @default(now()) @map("notificado_em")
+
+  @@index([medicamentoId, tipo])
+  @@map("alertas_notificados")
 }
