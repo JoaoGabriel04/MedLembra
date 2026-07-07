@@ -28,7 +28,7 @@ app.set('trust proxy', 1)
 
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
+  limit: 300,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'RATE_LIMIT_EXCEEDED', message: 'Muitas requisições. Tente novamente em alguns minutos.' }
@@ -36,7 +36,7 @@ const globalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 10,
+  limit: 30,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'RATE_LIMIT_EXCEEDED', message: 'Muitas tentativas. Tente novamente em 15 minutos.' }
