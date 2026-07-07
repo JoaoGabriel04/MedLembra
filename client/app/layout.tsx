@@ -11,7 +11,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'MedLembra',
+  title: 'MediSmart',
   description: 'Gestão de medicamentos para idosos',
 }
 

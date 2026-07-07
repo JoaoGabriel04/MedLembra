@@ -56,7 +56,7 @@ export default function LoginPage() {
           <div className="size-8 rounded-md bg-white/20 flex items-center justify-center shrink-0">
             <Pill className="size-4 text-white" />
           </div>
-          <span className="text-lg font-bold">MedLembra</span>
+          <span className="text-lg font-bold">MediSmart</span>
         </div>
 
         {/* Conteúdo central */}

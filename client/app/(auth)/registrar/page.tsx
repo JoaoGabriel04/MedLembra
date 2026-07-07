@@ -18,7 +18,7 @@ const schema = z
   .object({
     nome: z.string().min(2, 'Nome obrigatório'),
     email: z.string().email('E-mail inválido'),
-    senha: z.string().min(6, 'Mínimo 6 caracteres'),
+    senha: z.string().min(8, 'Mínimo 8 caracteres'),
     confirmarSenha: z.string().min(1, 'Confirme a senha'),
     tipo: z.enum(['IDOSO', 'CUIDADOR']),
   })
@@ -85,7 +85,7 @@ export default function RegistrarPage() {
           <div className="size-8 rounded-md bg-white/20 flex items-center justify-center shrink-0">
             <Pill className="size-4 text-white" />
           </div>
-          <span className="text-lg font-bold">MedLembra</span>
+          <span className="text-lg font-bold">MediSmart</span>
         </div>
 
         {/* Conteúdo central */}
@@ -102,7 +102,7 @@ export default function RegistrarPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-white/60 text-sm">MedLembra — feito para cuidar de quem cuida.</p>
+        <p className="text-white/60 text-sm">MediSmart — feito para cuidar de quem cuida.</p>
       </div>
 
       {/* Painel direito — branco */}
