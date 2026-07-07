@@ -24,7 +24,7 @@ export function GraficoAdesao({ resumo }: Props) {
   return (
     <div className="bg-card rounded-lg border border-border shadow-card p-5">
       <p className="text-[15px] font-semibold text-foreground mb-1">
-        Adesão dos últimos 7 dias
+        Resumo dos últimos 7 dias
       </p>
       <p className="text-xs text-muted-foreground mb-4">
         {resumo.adesao7dias.toFixed(0)}% de adesão no período

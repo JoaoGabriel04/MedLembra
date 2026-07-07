@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import { toast } from 'sonner'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Dialog } from '@base-ui/react/dialog'
 import { Button } from '@/components/ui/button'
 import { useMedicamentos, deletarMedicamento } from '@/hooks/use-medicamentos'
 import type { Medicamento } from '@/types/api'
@@ -21,28 +21,28 @@ function ConfirmarExclusao({
   onCancel: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-      <div className="w-full max-w-sm bg-card rounded-xl shadow-elevated p-8 flex flex-col gap-5">
-        <div>
-          <h2 className="text-[20px] font-semibold text-foreground">Excluir medicamento?</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            <span className="font-medium text-foreground">{nome}</span> será removido
-            permanentemente, incluindo todos os registros de tomada.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="secondary" size="default" className="flex-1" onClick={onCancel}>
-            Cancelar
-          </Button>
-          <Button
-            variant="primary"
-            size="default"
-            className="flex-1 !bg-destructive !text-white hover:!bg-red-700"
-            onClick={onConfirm}
-          >
-            Excluir
-          </Button>
-        </div>
+    <div className="w-full max-w-sm bg-card rounded-xl shadow-elevated p-8 flex flex-col gap-5">
+      <div>
+        <Dialog.Title className="text-[20px] font-semibold text-foreground">
+          Excluir medicamento?
+        </Dialog.Title>
+        <Dialog.Description className="text-sm text-muted-foreground mt-1">
+          <span className="font-medium text-foreground">{nome}</span> será removido
+          permanentemente, incluindo todos os registros de tomada.
+        </Dialog.Description>
+      </div>
+      <div className="flex gap-3">
+        <Button variant="secondary" size="default" className="flex-1" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button
+          variant="primary"
+          size="default"
+          className="flex-1 !bg-destructive !text-white hover:!bg-red-700"
+          onClick={onConfirm}
+        >
+          Excluir
+        </Button>
       </div>
     </div>
   )
@@ -107,14 +107,21 @@ function MedicamentoRow({
         </td>
       </tr>
 
-      {confirming && createPortal(
-        <ConfirmarExclusao
-          nome={med.nome}
-          onConfirm={handleDelete}
-          onCancel={() => setConfirming(false)}
-        />,
-        document.body
-      )}
+      <Dialog.Root
+        open={confirming}
+        onOpenChange={(open) => { if (!open) setConfirming(false) }}
+      >
+        <Dialog.Portal>
+          <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
+          <Dialog.Popup className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <ConfirmarExclusao
+              nome={med.nome}
+              onConfirm={handleDelete}
+              onCancel={() => setConfirming(false)}
+            />
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
     </>
   )
 }
