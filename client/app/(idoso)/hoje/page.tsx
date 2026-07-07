@@ -7,9 +7,11 @@ import { Pill } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth-store'
 import { useHoje, marcarTomada } from '@/hooks/use-hoje'
 import { useMe } from '@/hooks/use-me'
+import { useIdosoAlertas } from '@/hooks/use-idoso-alertas'
 import { ProgressoDiario } from '@/components/idoso/progresso-diario'
 import { Timeline } from '@/components/idoso/timeline'
 import { CardVinculo } from '@/components/idoso/card-vinculo'
+import { CardAlertaDestaque } from '@/components/idoso/card-alerta-destaque'
 import type { TimelineItem } from '@/components/idoso/timeline'
 
 function getDataFortaleza(): string {
@@ -21,6 +23,7 @@ export default function HojePage() {
   const { usuario } = useAuthStore()
   const { data, error, isLoading } = useHoje()
   const { data: me } = useMe()
+  const { data: alertasData } = useIdosoAlertas()
 
   const primeiroNome = (me?.nome ?? usuario?.nome ?? '').split(' ')[0]
 
@@ -56,6 +59,7 @@ export default function HojePage() {
             <div className="h-36 bg-muted animate-pulse rounded-lg" />
           </div>
           <div className="space-y-4">
+            <div className="h-40 bg-muted animate-pulse rounded-xl" />
             <div className="h-28 bg-muted animate-pulse rounded-lg" />
           </div>
         </div>
@@ -119,6 +123,7 @@ export default function HojePage() {
 
         {/* Sidebar — 1/3 */}
         <div className="flex flex-col gap-4">
+          <CardAlertaDestaque alertas={alertasData?.alertas ?? []} />
           <CardVinculo cuidador={me?.cuidador ?? null} />
         </div>
       </div>
