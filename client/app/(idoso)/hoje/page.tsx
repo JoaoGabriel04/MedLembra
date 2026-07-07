@@ -48,7 +48,7 @@ export default function HojePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-8 py-8">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="h-5 w-56 bg-muted animate-pulse rounded-md" />
@@ -80,7 +80,7 @@ export default function HojePage() {
   const emptyState = !data || data.medicamentos.length === 0
 
   return (
-    <div className="max-w-5xl mx-auto px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main — 2/3 */}
         <div className="lg:col-span-2 flex flex-col gap-6">

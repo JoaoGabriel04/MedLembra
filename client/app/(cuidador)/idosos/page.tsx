@@ -48,7 +48,7 @@ export default function IdososPage() {
   const idosos = data?.idosos ?? []
 
   return (
-    <div className="max-w-5xl mx-auto px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8">
       {/* Topo */}
       <div className="flex items-start justify-between mb-8 gap-4">
         <div>

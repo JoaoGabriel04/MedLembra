@@ -81,7 +81,7 @@ export default function MeusMedicamentosPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto px-8 py-8 flex flex-col gap-4">
+      <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-8 flex flex-col gap-4">
         <div className="h-8 w-56 bg-muted animate-pulse rounded-md" />
         <div className="h-4 w-40 bg-muted animate-pulse rounded-md" />
         {[1, 2, 3].map(i => (
@@ -104,7 +104,7 @@ export default function MeusMedicamentosPage() {
   const medicamentos = data?.medicamentos ?? []
 
   return (
-    <div className="max-w-3xl mx-auto px-8 py-8 flex flex-col gap-6">
+    <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-8 flex flex-col gap-6">
       <div>
         <h1 className="text-[32px] font-bold text-foreground leading-tight">Meus Medicamentos</h1>
         <p className="text-muted-foreground mt-1">

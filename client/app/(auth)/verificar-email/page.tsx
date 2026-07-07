@@ -108,9 +108,9 @@ function VerificarEmailContent() {
   return (
     <div className="w-full max-w-[960px] rounded-xl overflow-hidden flex flex-col md:flex-row shadow-elevated">
 
-      {/* Left panel */}
+      {/* Left panel (oculto no mobile) */}
       <div
-        className="flex flex-col p-10 text-white md:w-1/2"
+        className="hidden md:flex flex-col p-10 text-white md:w-1/2"
         style={{ background: 'var(--gradient-hero-login)' }}
       >
         <div className="flex items-center gap-2">
@@ -132,7 +132,14 @@ function VerificarEmailContent() {
       </div>
 
       {/* Right panel */}
-      <div className="flex flex-col justify-center gap-8 p-10 bg-card md:w-1/2">
+      <div className="flex flex-col justify-center gap-8 p-8 md:p-10 bg-card w-full md:w-1/2">
+        {/* Logo compacta — só mobile */}
+        <div className="flex items-center gap-2 md:hidden">
+          <div className="size-7 rounded-md flex items-center justify-center shrink-0" style={{ background: 'var(--gradient-primary)' }}>
+            <Pill className="size-3.5 text-white" />
+          </div>
+          <span className="text-base font-bold text-foreground">MediSmart</span>
+        </div>
         <div className="flex flex-col gap-3">
           <div className="size-11 rounded-full bg-primary flex items-center justify-center shrink-0">
             <MailCheck className="size-5 text-white" />
