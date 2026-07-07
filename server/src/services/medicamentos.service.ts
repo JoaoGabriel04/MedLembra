@@ -2,6 +2,7 @@ import { Medicamento, Horario } from '@prisma/client'
 import { AppError } from '../lib/errors'
 import { assertAccessToIdoso } from '../utils/acesso'
 import * as medicamentosRepo from '../repositories/medicamentos.repository'
+import * as alertasNotificadosRepo from '../repositories/alertas-notificados.repository'
 
 type MedicamentoComHorarios = Medicamento & { horarios: Horario[] }
 
@@ -113,6 +114,15 @@ export async function atualizarMedicamento(
   }
 
   const medicamento = await medicamentosRepo.updateComHorarios(id, updateData, input.horarios)
+
+  const estoqueReposto = input.estoqueAtual !== undefined && input.estoqueAtual > existing.estoqueAtual
+  const validadeMudou = input.dataValidade !== undefined &&
+    input.dataValidade !== existing.dataValidade.toISOString().slice(0, 10)
+
+  if (estoqueReposto || validadeMudou) {
+    await alertasNotificadosRepo.deleteByMedicamento(id)
+  }
+
   return formatMedicamento(medicamento)
 }
 
