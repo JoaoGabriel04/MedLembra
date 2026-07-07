@@ -8,6 +8,7 @@ import {
   deletarMedicamento
 } from '../services/medicamentos.service'
 import { zodErrorResponse, zIntParam } from '../lib/validation'
+import { buscarMedicamentosExternos } from '../services/medicamentos-externos.service'
 
 const horarioRegex = /^\d{2}:\d{2}$/
 
@@ -109,4 +110,23 @@ export async function deletar(req: Request, res: Response, next: NextFunction): 
     await deletarMedicamento(req.user!.id, req.user!.tipo, paramResult.data)
     res.status(204).send()
   } catch (err) { next(err) }
+}
+
+export async function buscaExterna(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const q = String(req.query.q ?? '').trim()
+  if (q.length < 3) {
+    res.status(400).json({ error: 'QUERY_MUITO_CURTA', message: 'q deve ter pelo menos 3 caracteres' })
+    return
+  }
+  try {
+    const resultados = await buscarMedicamentosExternos(q)
+    res.json({ resultados })
+  } catch (err: unknown) {
+    const statusCode = (err as { statusCode?: number }).statusCode
+    if (statusCode === 502) {
+      res.status(502).json({ error: 'EXTERNAL_API_ERROR', message: 'API externa indisponível' })
+      return
+    }
+    next(err)
+  }
 }
