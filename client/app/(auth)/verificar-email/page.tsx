@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { MailCheck, Pill } from 'lucide-react'
@@ -9,7 +9,7 @@ import { api } from '@/lib/api'
 import { useAuthStore } from '@/lib/auth-store'
 import type { AuthResponse } from '@/types/api'
 
-export default function VerificarEmailPage() {
+function VerificarEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const email = searchParams.get('email') ?? ''
@@ -190,5 +190,13 @@ export default function VerificarEmailPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerificarEmailPage() {
+  return (
+    <Suspense>
+      <VerificarEmailContent />
+    </Suspense>
   )
 }
