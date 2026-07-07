@@ -11,6 +11,7 @@ import { medicamentosRoutes } from './routes/medicamentos.routes'
 import { registrosRoutes } from './routes/registros.routes'
 import { idosoRoutes } from './routes/idoso.routes'
 import { errorHandler } from './middlewares/error.middleware'
+import { seedMedicamentosSeVazio } from './lib/seed-medicamentos'
 
 dotenv.config()
 
@@ -69,4 +70,7 @@ app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
+  void seedMedicamentosSeVazio().catch(err =>
+    console.error('[seed] Falha ao popular medicamentos_referencia:', err)
+  )
 })
