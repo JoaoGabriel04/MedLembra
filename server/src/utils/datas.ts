@@ -24,3 +24,11 @@ export function getInicio7DiasFortaleza(): Date {
   // 6 dias atrás para incluir hoje = janela de 7 dias
   return new Date(Date.UTC(ano, mes, dia - 6, 3, 0, 0))
 }
+
+export function getInicioNDiasFortaleza(n: number): Date {
+  const em = agoraEmFortaleza()
+  const ano = em.getUTCFullYear()
+  const mes = em.getUTCMonth()
+  const dia = em.getUTCDate()
+  return new Date(Date.UTC(ano, mes, dia - (n - 1), 3, 0, 0))
+}
