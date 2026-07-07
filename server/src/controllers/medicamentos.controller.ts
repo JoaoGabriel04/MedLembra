@@ -121,12 +121,5 @@ export async function buscaExterna(req: Request, res: Response, next: NextFuncti
   try {
     const resultados = await buscarMedicamentosExternos(q)
     res.json({ resultados })
-  } catch (err: unknown) {
-    const statusCode = (err as { statusCode?: number }).statusCode
-    if (statusCode === 502) {
-      res.status(502).json({ error: 'EXTERNAL_API_ERROR', message: 'API externa indisponível' })
-      return
-    }
-    next(err)
-  }
+  } catch (err) { next(err) }
 }

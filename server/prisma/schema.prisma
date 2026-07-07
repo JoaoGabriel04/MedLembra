@@ -87,3 +87,11 @@ model AlertaNotificado {
   @@unique([medicamentoId, tipo])
   @@map("alertas_notificados")
 }
+
+model MedicamentoReferencia {
+  id   Int    @id @default(autoincrement())
+  nome String @db.VarChar(200)
+
+  @@index([nome])
+  @@map("medicamentos_referencia")
+}

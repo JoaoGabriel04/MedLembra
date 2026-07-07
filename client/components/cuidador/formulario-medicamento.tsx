@@ -152,7 +152,7 @@ export function FormularioMedicamento({ defaultValues, onSubmit, submitLabel = '
               role="listbox"
               className="absolute z-50 top-full left-0 right-0 mt-1 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] max-h-48 overflow-y-auto"
             >
-              {sugestoes.map((s, i) => (
+              {sugestoes.map((s) => (
                 <li key={s.nome}>
                   <button
                     type="button"
