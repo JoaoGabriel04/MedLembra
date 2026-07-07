@@ -1,7 +1,7 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 import { assertAccessToIdoso } from '../utils/acesso'
-import { getInicioNDiasFortaleza } from '../utils/datas'
+import { getInicioNDiasFortaleza, getHojeFortaleza } from '../utils/datas'
 import { calcularAlertas } from '../utils/alertas'
 import * as usuariosRepo from '../repositories/usuarios.repository'
 import * as medicamentosRepo from '../repositories/medicamentos.repository'
@@ -29,9 +29,6 @@ const styles = StyleSheet.create({
   rodape: { position: 'absolute', bottom: 30, left: 40, right: 40, textAlign: 'center', fontSize: 8, color: '#aaa' },
 })
 
-function formatarData(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
 
 export async function gerarRelatorio(cuidadorId: number, idosoId: number, periodosDias: 7 | 30): Promise<Buffer> {
   await assertAccessToIdoso(cuidadorId, 'CUIDADOR', idosoId)
@@ -58,7 +55,7 @@ export async function gerarRelatorio(cuidadorId: number, idosoId: number, period
   }))
   const alertas = calcularAlertas(medicamentosParaAlerta)
 
-  const hoje = formatarData(new Date())
+  const { dataStr: hoje } = getHojeFortaleza()
 
   const doc = (
     <Document>
