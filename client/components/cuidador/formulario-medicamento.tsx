@@ -58,6 +58,7 @@ export function FormularioMedicamento({ defaultValues, onSubmit, submitLabel = '
   const [debouncedQ, setDebouncedQ] = useState('')
   const [dropdownAberto, setDropdownAberto] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const supressNextOpen = useRef(false)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -82,7 +83,13 @@ export function FormularioMedicamento({ defaultValues, onSubmit, submitLabel = '
   const { data: buscaData, isLoading: buscando } = useSWR<BuscaExternaResponse>(
     buscaAtiva ? swrKeys.buscaExterna(debouncedQ) : null,
     (key: string) => api<BuscaExternaResponse>(key),
-    { revalidateOnFocus: false, onSuccess: () => setDropdownAberto(true) }
+    {
+      revalidateOnFocus: false,
+      onSuccess: () => {
+        if (supressNextOpen.current) { supressNextOpen.current = false; return }
+        setDropdownAberto(true)
+      }
+    }
   )
 
   const sugestoes = buscaData?.resultados ?? []
@@ -93,6 +100,7 @@ export function FormularioMedicamento({ defaultValues, onSubmit, submitLabel = '
     if (sugestao.dosagemSugerida) {
       setValue('dosagem', sugestao.dosagemSugerida, { shouldValidate: true })
     }
+    supressNextOpen.current = true
     setDropdownAberto(false)
   }
 
@@ -145,7 +153,7 @@ export function FormularioMedicamento({ defaultValues, onSubmit, submitLabel = '
               className="absolute z-50 top-full left-0 right-0 mt-1 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] max-h-48 overflow-y-auto"
             >
               {sugestoes.map((s, i) => (
-                <li key={i}>
+                <li key={s.nome}>
                   <button
                     type="button"
                     role="option"
