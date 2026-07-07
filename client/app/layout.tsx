@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { SWRProvider } from '@/lib/swr-config'
+import { FotoSync } from '@/components/foto-sync'
 import './globals.css'
 
 const inter = Inter({
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={inter.variable}>
       <body>
         <SWRProvider>
+          <FotoSync />
           {children}
         </SWRProvider>
         <Toaster position="top-right" richColors />
