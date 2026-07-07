@@ -1,13 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
-import { Plus, Trash2 } from 'lucide-react'
+import { Loader2, Plus, Search, Trash2 } from 'lucide-react'
+import useSWR from 'swr'
 import { zodResolver } from '@/lib/form'
+import { api } from '@/lib/api'
+import { swrKeys } from '@/lib/swr-keys'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import type { CriarMedicamentoInput } from '@/types/api'
+import type { BuscaExternaResponse, CriarMedicamentoInput } from '@/types/api'
 
 const schema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
@@ -49,6 +52,49 @@ export function FormularioMedicamento({ defaultValues, onSubmit, submitLabel = '
 
   const { fields, append, remove } = useFieldArray({ control, name: 'horarios' })
   const frequencia = watch('frequenciaDiaria')
+  const nomeValue = watch('nome')
+
+  // Debounce for autocomplete
+  const [debouncedQ, setDebouncedQ] = useState('')
+  const [dropdownAberto, setDropdownAberto] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQ(nomeValue?.trim() ?? '')
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [nomeValue])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownAberto(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const buscaAtiva = debouncedQ.length >= 3
+
+  const { data: buscaData, isLoading: buscando } = useSWR<BuscaExternaResponse>(
+    buscaAtiva ? swrKeys.buscaExterna(debouncedQ) : null,
+    (key: string) => api<BuscaExternaResponse>(key),
+    { revalidateOnFocus: false, onSuccess: () => setDropdownAberto(true) }
+  )
+
+  const sugestoes = buscaData?.resultados ?? []
+  const buscandoOuDebouncing = (nomeValue?.trim().length ?? 0) >= 3 && (buscando || debouncedQ !== nomeValue?.trim())
+
+  function selecionarSugestao(sugestao: { nome: string; dosagemSugerida: string | null }) {
+    setValue('nome', sugestao.nome, { shouldValidate: true })
+    if (sugestao.dosagemSugerida) {
+      setValue('dosagem', sugestao.dosagemSugerida, { shouldValidate: true })
+    }
+    setDropdownAberto(false)
+  }
 
   // Sync horarios array length with frequenciaDiaria
   useEffect(() => {
@@ -78,12 +124,46 @@ export function FormularioMedicamento({ defaultValues, onSubmit, submitLabel = '
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Input
-          label="Nome do medicamento"
-          placeholder="Ex: Losartana"
-          error={errors.nome?.message}
-          {...register('nome')}
-        />
+
+        {/* Nome do medicamento — with autocomplete */}
+        <div className="relative" ref={dropdownRef}>
+          <Input
+            label="Nome do medicamento"
+            placeholder="Ex: Losartana"
+            icon={buscandoOuDebouncing
+              ? <Loader2 className="animate-spin" />
+              : <Search />
+            }
+            error={errors.nome?.message}
+            autoComplete="off"
+            {...register('nome')}
+            onFocus={() => sugestoes.length > 0 && setDropdownAberto(true)}
+          />
+          {dropdownAberto && sugestoes.length > 0 && (
+            <ul
+              role="listbox"
+              className="absolute z-50 top-full left-0 right-0 mt-1 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] max-h-48 overflow-y-auto"
+            >
+              {sugestoes.map((s, i) => (
+                <li key={i}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={false}
+                    onMouseDown={() => selecionarSugestao(s)}
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--color-surface-alt)] transition-colors"
+                  >
+                    <span className="font-medium">{s.nome}</span>
+                    {s.dosagemSugerida && (
+                      <span className="ml-2 text-[var(--color-text-label)]">{s.dosagemSugerida}</span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <Input
           label="Dosagem"
           placeholder="Ex: 50mg"

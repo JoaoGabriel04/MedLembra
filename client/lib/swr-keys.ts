@@ -8,4 +8,5 @@ export const swrKeys = {
   dashboard: (idosoId: number) => `/cuidador/dashboard/${idosoId}`,
   alertas: () => '/cuidador/alertas',
   idosoAlertas: () => '/idoso/alertas',
+  buscaExterna: (q: string) => `/medicamentos/busca-externa?q=${encodeURIComponent(q)}`,
 }

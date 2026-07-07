@@ -166,3 +166,13 @@ export interface AlertasResponse {
 export interface IdosoAlertasResponse {
   alertas: Alerta[]
 }
+
+// Extensão C — busca externa de medicamentos
+export interface ResultadoExterno {
+  nome: string
+  dosagemSugerida: string | null
+}
+
+export interface BuscaExternaResponse {
+  resultados: ResultadoExterno[]
+}
