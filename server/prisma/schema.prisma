@@ -84,6 +84,6 @@ model AlertaNotificado {
   tipo         TipoAlerta
   notificadoEm DateTime    @default(now()) @map("notificado_em")
 
-  @@index([medicamentoId, tipo])
+  @@unique([medicamentoId, tipo])
   @@map("alertas_notificados")
 }
