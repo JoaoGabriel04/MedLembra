@@ -16,6 +16,15 @@ export interface AuthResponse {
   usuario: Usuario
 }
 
+export interface RegisterResponse {
+  message: string
+  email: string
+}
+
+export type LoginResponse =
+  | { emailVerificado: true; token: string; usuario: Usuario }
+  | { emailVerificado: false; email: string }
+
 // /usuarios/me
 export interface UsuarioBasico {
   id: number

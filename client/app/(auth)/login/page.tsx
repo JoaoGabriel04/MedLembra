@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { zodResolver } from '@/lib/form'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/lib/auth-store'
-import type { AuthResponse } from '@/types/api'
+import type { LoginResponse } from '@/types/api'
 
 const schema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -32,10 +32,15 @@ export default function LoginPage() {
 
   async function onSubmit(data: FormData) {
     try {
-      const res = await api<AuthResponse>('/auth/login', {
+      const res = await api<LoginResponse>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(data),
       })
+      if (!res.emailVerificado) {
+        toast.info('Verifique seu e-mail para continuar.')
+        router.push(`/verificar-email?email=${encodeURIComponent(res.email)}`)
+        return
+      }
       login(res.token, res.usuario)
       router.push('/')
     } catch (err) {

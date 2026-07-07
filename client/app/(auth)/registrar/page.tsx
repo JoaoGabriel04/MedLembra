@@ -11,8 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { zodResolver } from '@/lib/form'
 import { api } from '@/lib/api'
-import { useAuthStore } from '@/lib/auth-store'
-import type { AuthResponse, TipoUsuario } from '@/types/api'
+import type { RegisterResponse, TipoUsuario } from '@/types/api'
 
 const schema = z
   .object({
@@ -49,7 +48,6 @@ const TIPOS: { value: TipoUsuario; label: string; sub: string; desc: string; ico
 
 export default function RegistrarPage() {
   const router = useRouter()
-  const login = useAuthStore((s) => s.login)
 
   const {
     register,
@@ -61,12 +59,12 @@ export default function RegistrarPage() {
   async function onSubmit(data: FormData) {
     const { confirmarSenha: _, ...payload } = data
     try {
-      const res = await api<AuthResponse>('/auth/register', {
+      const res = await api<RegisterResponse>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(payload),
       })
-      login(res.token, res.usuario)
-      router.push('/')
+      toast.success(res.message)
+      router.push(`/verificar-email?email=${encodeURIComponent(res.email)}`)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Não foi possível concluir a ação')
     }
