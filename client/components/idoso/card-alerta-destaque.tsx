@@ -53,7 +53,7 @@ export function CardAlertaDestaque({ alertas }: Props) {
 
       {/* CTA */}
       <Link
-        href="/hoje"
+        href="/meus-medicamentos"
         className="inline-flex items-center justify-center px-4 py-2.5 rounded-md bg-white text-sm font-semibold"
         style={{ color: 'var(--color-accent)' }}
       >

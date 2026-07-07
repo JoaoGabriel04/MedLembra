@@ -26,11 +26,15 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, { ...init, headers })
 
   if (res.status === 401) {
-    useAuthStore.getState().logout()
-    if (typeof window !== 'undefined') {
-      window.location.replace('/login')
+    if (token) {
+      useAuthStore.getState().logout()
+      if (typeof window !== 'undefined') {
+        window.location.replace('/login')
+      }
+      throw new ApiError(401, 'UNAUTHORIZED', 'Sessão expirada')
     }
-    throw new ApiError(401, 'UNAUTHORIZED', 'Sessão expirada')
+    const body = await res.json().catch(() => ({}))
+    throw new ApiError(401, body.error ?? 'UNAUTHORIZED', body.message ?? 'Credenciais inválidas')
   }
 
   if (res.status === 204) {
