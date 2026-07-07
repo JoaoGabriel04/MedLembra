@@ -22,6 +22,7 @@ model Usuario {
   email        String      @unique
   senhaHash    String      @map("senha_hash")
   tipo         TipoUsuario
+  fotoUrl      String?     @map("foto_url")
 
   cuidadorId   Int?
   cuidador     Usuario?    @relation("CuidadorIdosos", fields: [cuidadorId], references: [id])
