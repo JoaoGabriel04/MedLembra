@@ -4,16 +4,15 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Link2, Plus } from 'lucide-react'
+import { Dialog } from '@base-ui/react/dialog'
 import { cn } from '@/lib/utils'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/lib/auth-store'
 import { useCuidadorIdosos, vincularIdoso } from '@/hooks/use-cuidador-idosos'
 import { useAlertas } from '@/hooks/use-alertas'
 
-function getInitials(nome: string): string {
-  return nome.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('')
-}
 
 export default function IdososPage() {
   const { usuario } = useAuthStore()
@@ -99,11 +98,7 @@ export default function IdososPage() {
                 href={`/idosos/${idoso.id}`}
                 className="bg-card rounded-lg border border-border shadow-card p-5 flex items-center gap-4 hover:shadow-elevated transition-shadow"
               >
-                <div className="size-10 rounded-full bg-primary flex items-center justify-center shrink-0">
-                  <span className="text-sm font-semibold text-white">
-                    {getInitials(idoso.nome)}
-                  </span>
-                </div>
+                <AvatarUpload fotoUrl={idoso.fotoUrl} nome={idoso.nome} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[15px] font-semibold text-foreground truncate">
                     {idoso.nome}
@@ -127,51 +122,64 @@ export default function IdososPage() {
       )}
 
       {/* Modal vincular */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="w-full max-w-sm bg-card rounded-xl shadow-elevated p-8 flex flex-col gap-6">
-            <div>
-              <h2 className="text-[22px] font-semibold text-foreground">Vincular Idoso</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Insira o e-mail da conta do idoso.
-              </p>
-            </div>
-            <form onSubmit={handleVincular} className="flex flex-col gap-4">
-              <Input
-                label="E-mail do idoso"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="idoso@email.com"
-                autoFocus
-              />
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="default"
-                  className="flex-1"
-                  onClick={() => {
-                    setModalOpen(false)
-                    setEmail('')
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="default"
-                  className="flex-1"
-                  disabled={linking}
-                >
-                  {linking ? 'Vinculando...' : 'Vincular'}
-                </Button>
+      <Dialog.Root
+        open={modalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setModalOpen(false)
+            setEmail('')
+          }
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
+          <Dialog.Popup className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-sm bg-card rounded-xl shadow-elevated p-8 flex flex-col gap-6">
+              <div>
+                <Dialog.Title className="text-[22px] font-semibold text-foreground">
+                  Vincular Idoso
+                </Dialog.Title>
+                <Dialog.Description className="text-sm text-muted-foreground mt-1">
+                  Insira o e-mail da conta do idoso.
+                </Dialog.Description>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <form onSubmit={handleVincular} className="flex flex-col gap-4">
+                <Input
+                  label="E-mail do idoso"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="idoso@email.com"
+                  autoFocus
+                />
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="default"
+                    className="flex-1"
+                    onClick={() => {
+                      setModalOpen(false)
+                      setEmail('')
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="default"
+                    className="flex-1"
+                    disabled={linking}
+                  >
+                    {linking ? 'Vinculando...' : 'Vincular'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   )
 }

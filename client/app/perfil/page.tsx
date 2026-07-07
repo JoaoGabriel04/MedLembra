@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Link2, LogOut, User } from 'lucide-react'
+import { Link2, LogOut } from 'lucide-react'
 import { mutate } from 'swr'
 import { api } from '@/lib/api'
 import { swrKeys } from '@/lib/swr-keys'
 import { useAuthStore } from '@/lib/auth-store'
 import { useMe } from '@/hooks/use-me'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -60,11 +61,12 @@ function PerfilIdoso() {
       </div>
 
       <div className="bg-card rounded-lg border border-border shadow-card p-6 flex items-center gap-5 mb-6">
-        <div className="size-16 rounded-full bg-primary flex items-center justify-center shrink-0">
-          <span className="text-xl font-bold text-white">
-            {usuario?.nome ? getInitials(usuario.nome) : <User className="size-6" />}
-          </span>
-        </div>
+        <AvatarUpload
+          fotoUrl={data?.fotoUrl}
+          nome={usuario?.nome ?? ''}
+          size="lg"
+          editavel
+        />
         <div>
           <p className="text-lg font-semibold text-foreground">{usuario?.nome}</p>
           <p className="text-sm text-muted-foreground">{usuario?.email}</p>
@@ -147,11 +149,12 @@ function PerfilCuidador() {
       </div>
 
       <div className="bg-card rounded-lg border border-border shadow-card p-6 flex items-center gap-5 mb-6">
-        <div className="size-16 rounded-full bg-primary flex items-center justify-center shrink-0">
-          <span className="text-xl font-bold text-white">
-            {usuario?.nome ? getInitials(usuario.nome) : <User className="size-6" />}
-          </span>
-        </div>
+        <AvatarUpload
+          fotoUrl={data?.fotoUrl}
+          nome={usuario?.nome ?? ''}
+          size="lg"
+          editavel
+        />
         <div>
           <p className="text-lg font-semibold text-foreground">{usuario?.nome}</p>
           <p className="text-sm text-muted-foreground">{usuario?.email}</p>

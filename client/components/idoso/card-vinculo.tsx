@@ -1,18 +1,10 @@
 import { Link2 } from 'lucide-react'
 import Link from 'next/link'
-import type { MeResponse } from '@/types/api'
+import type { UsuarioBasico } from '@/types/api'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
 
 interface Props {
-  cuidador: MeResponse['cuidador']
-}
-
-function initials(nome: string): string {
-  return nome
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
+  cuidador: UsuarioBasico | null
 }
 
 export function CardVinculo({ cuidador }: Props) {
@@ -24,9 +16,7 @@ export function CardVinculo({ cuidador }: Props) {
 
       {cuidador ? (
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-full bg-primary flex items-center justify-center shrink-0">
-            <span className="text-sm font-semibold text-white">{initials(cuidador.nome)}</span>
-          </div>
+          <AvatarUpload fotoUrl={cuidador.fotoUrl} nome={cuidador.nome} size="sm" />
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground truncate">{cuidador.nome}</p>
             <p className="text-xs text-muted-foreground truncate">{cuidador.email}</p>

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Pill } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/lib/auth-store'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
 
 const NAV = {
   IDOSO: [
@@ -18,14 +19,6 @@ const NAV = {
   ],
 } as const
 
-function initials(nome: string): string {
-  return nome
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
-}
 
 export function HeaderTopo() {
   const { usuario } = useAuthStore()
@@ -70,9 +63,7 @@ export function HeaderTopo() {
       {/* Avatar do usuário */}
       {usuario && (
         <div className="flex items-center gap-3 shrink-0">
-          <div className="size-9 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-xs font-semibold text-white">{initials(usuario.nome)}</span>
-          </div>
+          <AvatarUpload fotoUrl={usuario.fotoUrl} nome={usuario.nome} size="sm" />
           <div className="leading-tight text-left hidden sm:block">
             <p className="text-sm font-medium text-foreground line-clamp-1">{usuario.nome}</p>
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text-label)]">
